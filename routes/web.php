@@ -11,6 +11,4 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('front/cron', 'Front\CronController@index')->name('front_cron_index');
