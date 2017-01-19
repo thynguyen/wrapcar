@@ -11,4 +11,6 @@
 |
 */
 
+Route::get('/', 'Front\HomeController@index')->name('home_index');
+Route::get('search', 'Front\SearchController@index')->name('search_index');
 Route::get('front/cron', 'Front\CronController@index')->name('front_cron_index');
