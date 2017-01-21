@@ -37,11 +37,11 @@ class CronController extends BaseController
 
         $this->getEnBac();
 
+        $this->getCafeAuto();*/
         $this->getTheGioiXeOto();
 
         $this->getOtoThien();
 
-        $this->getCafeAuto();*/
 
         $this->addDataToSolr();
     }
