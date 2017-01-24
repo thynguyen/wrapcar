@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 24, 2017 at 06:05 PM
+-- Generation Time: Jan 24, 2017 at 06:20 PM
 -- Server version: 5.6.24
 -- PHP Version: 5.6.8
 
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS `contents` (
   `short_content` text,
   `type` varchar(50) DEFAULT NULL,
   `date_post` varchar(255) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `created_at` datetime DEFAULT NULL,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
