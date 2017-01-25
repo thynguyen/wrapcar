@@ -9,7 +9,7 @@ use Illuminate\Pagination\Paginator;
 
 class SearchController extends Controller
 {
-    public function index(Request $request)
+    public function index_bk(Request $request)
     {
         $data = array();
         $pagination = null;
@@ -59,6 +59,24 @@ class SearchController extends Controller
                 ]
             );
         }
+        return view('search.index', ['keyword' => $keyword, 'pagination' => $pagination]);
+    }
+
+    public function index(Request $request)
+    {
+        $data = array();
+//        $pagination = null;
+
+//        $page = $request->get('page', 1); // Get the current page or default to 1, this is what you miss!
+//        $perPage = 10;
+//        $offset = ($page * $perPage) - $perPage;
+
+        $keyword = $request->get('keyword');
+
+        $content = new \App\Models\Contents();
+        $pagination = $content->getContent($keyword);
+
+
         return view('search.index', ['keyword' => $keyword, 'pagination' => $pagination]);
     }
 }

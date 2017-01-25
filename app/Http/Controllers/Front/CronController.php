@@ -8,7 +8,6 @@ class CronController extends BaseController
 {
     public function index(Request $request)
     {
-        /*
         $this->getBonBanh();
 
         $this->getMuaBan();
@@ -37,13 +36,14 @@ class CronController extends BaseController
 
         $this->getEnBac();
 
-        $this->getCafeAuto();*/
+        $this->getCafeAuto();
+
         $this->getTheGioiXeOto();
 
         $this->getOtoThien();
 
 
-        $this->addDataToSolr();
+        //$this->addDataToSolr();
     }
 
     protected function addDataToSolr()

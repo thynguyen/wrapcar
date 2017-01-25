@@ -37,9 +37,10 @@ class BaseController extends Controller
             preg_match_all('/\d+/', $number, $matches);
             $total = isset($matches[0][0]) ? $matches[0][0] : 0;
             $totalPage = $this->getTotalPage($total, $limit);
+            $totalPage = 80;
         }
         if ($dataOld === NULL) {
-            $page = $totalPage;
+            //$page = $totalPage;
         }
         $this->getContentBonBanh($page, $totalPage, $dataOld);
 
@@ -58,7 +59,8 @@ class BaseController extends Controller
 
         ini_set('max_execution_time', 0);
 
-        $total = 4000;
+        //$total = 4000;
+        $total = 500;
         $totalPage = $this->getTotalPage($total, $limit);
         if ($dataOld === NULL) {
             $page = $totalPage;
@@ -110,7 +112,8 @@ class BaseController extends Controller
         $attrs = $html->find('ul.pagination', 0)->attr;
         unset($html);
 
-        $totalPage = isset($attrs['data-total-pages']) ? $attrs['data-total-pages'] : 0;
+        //$totalPage = isset($attrs['data-total-pages']) ? $attrs['data-total-pages'] : 0;
+        $totalPage = 20;
         if (empty($totalPage)) {
             return;
         }
@@ -145,6 +148,7 @@ class BaseController extends Controller
         if ($textTotal) {
             $total = str_replace(',', '', $textTotal);
             $totalPage = $this->getTotalPage($total, $limit);
+            $totalPage = 30;
         }
         if ($dataOld === NULL) {
             $page = $totalPage;
@@ -170,6 +174,7 @@ class BaseController extends Controller
 
         $html = HtmlDomParser::file_get_html($url . 'oto/?page=1');
         $totalPage = $html->find('.pagination li', 6)->plaintext;
+        $totalPage = 40;
         unset($html);
 
         if ($dataOld === NULL) {
@@ -218,6 +223,7 @@ class BaseController extends Controller
         $html = HtmlDomParser::file_get_html($url . 'xe-oto/');
         $attrs = $html->find('.PageNav', 0)->attr;
         $totalPage = isset($attrs['data-last']) ? $attrs['data-last'] : 0;
+        $totalPage = 60;
         unset($html);
         if (empty($totalPage)) {
             return;
@@ -248,6 +254,7 @@ class BaseController extends Controller
         $html = HtmlDomParser::file_get_html($url . 'oto/?page=1');
         $href = @$html->find('.pagination li', 6)->find('a', 0)->href;
         $totalPage = str_replace('/oto?page=', '', $href);
+        $totalPage = 100;
         unset($html);
 
         if ($dataOld === NULL) {
@@ -296,6 +303,7 @@ class BaseController extends Controller
         $html = HtmlDomParser::file_get_html($url . 'mua-ban-o-to?page=1');
         $href = @$html->find('.page-navi ul li', 6)->find('a', 0)->href;
         $totalPage = str_replace('https://muabannhanh.com/mua-ban-o-to?page=', '', $href);
+        $totalPage = 100;
         unset($html);
 
         if ($dataOld === NULL) {
@@ -369,6 +377,7 @@ class BaseController extends Controller
         $totalPage = 1;
         if (!empty($textTotal)) {
             $totalPage = $this->getTotalPage($textTotal, $limit);
+            $totalPage = 30;
         }
         if ($dataOld === NULL) {
             $page = $totalPage;
@@ -395,6 +404,7 @@ class BaseController extends Controller
         $html = HtmlDomParser::file_get_html($url . 'mua-o-to/');
         $totalPage = $html->find('.page-numbers li', 4)->find('.page-numbers', 0)->plaintext;
         unset($html);
+        $totalPage = 40;
 
         if ($dataOld === NULL) {
             $page = $totalPage;
@@ -586,7 +596,11 @@ class BaseController extends Controller
                 $price = trim($item->find('a', 1)->find('.mbn-price', 0)->plaintext);
                 $city = trim($item->find('a', 1)->find('.mbn-address', 0)->plaintext);
                 $datePost = trim($item->find('a', 1)->find('.mbn-date', 0)->plaintext);
-                $shortContent = trim($item->find('a', 1)->find('.mbn-item-summary', 0)->innertext());
+                $summary = $item->find('a', 1)->find('.mbn-item-summary', 0);
+                $shortContent = null;
+                if (is_object($summary)) {
+                    $shortContent = trim($summary->innertext());
+                }
 
                 if ($dataOld !== NULL) {
                     if ($dataOld->link == $link) {
