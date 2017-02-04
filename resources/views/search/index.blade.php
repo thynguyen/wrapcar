@@ -23,7 +23,7 @@
         <div class="container">
 
             <form name="f" id="f" action="{{ route('search_index') }}" method="GET">
-                <input type="textbox" name="keyword" value="{{ $keyword }}" />
+                <input type="textbox" name="keyword" value="{{ isset($keyword) ? $keyword : '' }}" style="width: 100%" />
 
                 <input type="submit" value="Search" />
             </form>
@@ -34,11 +34,14 @@
                     <h3>
                         <a href="{{ $item->link }}">{{ $item->brand_car }}</a>
                     </h3>
-                    <div>Giá: {{ str_replace('Giá:', '', $item->price) }}</div>
+                    <h6>
+                        <a href="{{ $item->link }}">{{ $item->link }}</a>
+                    </h6>
+                    <div>Giá: {!! str_replace('Giá:', '', $item->price) !!}</div>
                     <div>Liên hệ: {{ $item->contact }}</div>
                     <div>Thành phố: {{ $item->city }}</div>
                     <div>
-                        {!! $item->short_content !!}
+                        {!! substr($item->short_content, 0, 1000) !!}...
                     </div>
                 </div>
                 @endforeach

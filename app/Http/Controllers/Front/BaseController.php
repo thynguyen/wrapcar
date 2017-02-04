@@ -6,11 +6,14 @@ use Sunra\PhpSimple\HtmlDomParser;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\Contents;
+use Illuminate\Http\Request;
 
 class BaseController extends Controller
 {
-    public function __construct() {
-        
+    public $type = null;
+
+    public function __construct(Request $request) {
+        $this->type = $request->get('type');
     }
 
     protected function getBonBanh($page = 1, $limit = 20)
@@ -37,10 +40,9 @@ class BaseController extends Controller
             preg_match_all('/\d+/', $number, $matches);
             $total = isset($matches[0][0]) ? $matches[0][0] : 0;
             $totalPage = $this->getTotalPage($total, $limit);
-            $totalPage = 80;
         }
         if ($dataOld === NULL) {
-            //$page = $totalPage;
+            $page = $totalPage;
         }
         $this->getContentBonBanh($page, $totalPage, $dataOld);
 
@@ -59,9 +61,7 @@ class BaseController extends Controller
 
         ini_set('max_execution_time', 0);
 
-        //$total = 4000;
-        $total = 500;
-        $totalPage = $this->getTotalPage($total, $limit);
+        $totalPage = 200;
         if ($dataOld === NULL) {
             $page = $totalPage;
         }
@@ -81,9 +81,11 @@ class BaseController extends Controller
         ob_flush();
 
         ini_set('max_execution_time', 0);
-        DEFINE('MAX_FILE_SIZE', 6000000);
+        if (!defined('MAX_FILE_SIZE')) {
+            DEFINE('MAX_FILE_SIZE', 6000000);
+        }
 
-        $totalPage = 0; // Only one page
+        $totalPage = 1; // Only one page
         if ($dataOld === NULL) {
             $page = $totalPage;
         }
@@ -104,16 +106,21 @@ class BaseController extends Controller
         ob_flush();
 
         ini_set('max_execution_time', 0);
-        DEFINE('MAX_FILE_SIZE', 6000000);
+        if (!defined('MAX_FILE_SIZE')) {
+            DEFINE('MAX_FILE_SIZE', 6000000);
+        }
 
         $url = \config('wrap.url_site.carmudi') . '/all/?sort=suggested&page=1';
 
         $html = HtmlDomParser::file_get_html($url);
+        if (!is_object($html)) {
+            unset($html);
+            return;
+        }
         $attrs = $html->find('ul.pagination', 0)->attr;
         unset($html);
 
-        //$totalPage = isset($attrs['data-total-pages']) ? $attrs['data-total-pages'] : 0;
-        $totalPage = 20;
+        $totalPage = isset($attrs['data-total-pages']) ? $attrs['data-total-pages'] : 0;
         if (empty($totalPage)) {
             return;
         }
@@ -148,7 +155,6 @@ class BaseController extends Controller
         if ($textTotal) {
             $total = str_replace(',', '', $textTotal);
             $totalPage = $this->getTotalPage($total, $limit);
-            $totalPage = 30;
         }
         if ($dataOld === NULL) {
             $page = $totalPage;
@@ -174,7 +180,6 @@ class BaseController extends Controller
 
         $html = HtmlDomParser::file_get_html($url . 'oto/?page=1');
         $totalPage = $html->find('.pagination li', 6)->plaintext;
-        $totalPage = 40;
         unset($html);
 
         if ($dataOld === NULL) {
@@ -223,7 +228,7 @@ class BaseController extends Controller
         $html = HtmlDomParser::file_get_html($url . 'xe-oto/');
         $attrs = $html->find('.PageNav', 0)->attr;
         $totalPage = isset($attrs['data-last']) ? $attrs['data-last'] : 0;
-        $totalPage = 60;
+
         unset($html);
         if (empty($totalPage)) {
             return;
@@ -254,7 +259,6 @@ class BaseController extends Controller
         $html = HtmlDomParser::file_get_html($url . 'oto/?page=1');
         $href = @$html->find('.pagination li', 6)->find('a', 0)->href;
         $totalPage = str_replace('/oto?page=', '', $href);
-        $totalPage = 100;
         unset($html);
 
         if ($dataOld === NULL) {
@@ -303,7 +307,6 @@ class BaseController extends Controller
         $html = HtmlDomParser::file_get_html($url . 'mua-ban-o-to?page=1');
         $href = @$html->find('.page-navi ul li', 6)->find('a', 0)->href;
         $totalPage = str_replace('https://muabannhanh.com/mua-ban-o-to?page=', '', $href);
-        $totalPage = 100;
         unset($html);
 
         if ($dataOld === NULL) {
@@ -326,7 +329,7 @@ class BaseController extends Controller
 
         ini_set('max_execution_time', 0);
 
-        $totalPage = 319;
+        $totalPage = 153;
         if ($dataOld === NULL) {
             $page = $totalPage;
         }
@@ -377,7 +380,6 @@ class BaseController extends Controller
         $totalPage = 1;
         if (!empty($textTotal)) {
             $totalPage = $this->getTotalPage($textTotal, $limit);
-            $totalPage = 30;
         }
         if ($dataOld === NULL) {
             $page = $totalPage;
@@ -404,7 +406,6 @@ class BaseController extends Controller
         $html = HtmlDomParser::file_get_html($url . 'mua-o-to/');
         $totalPage = $html->find('.page-numbers li', 4)->find('.page-numbers', 0)->plaintext;
         unset($html);
-        $totalPage = 40;
 
         if ($dataOld === NULL) {
             $page = $totalPage;
@@ -463,15 +464,11 @@ class BaseController extends Controller
         flush();
         ob_flush();
 
-        if ($page == 0) {
+        if ($page <= 0 || $page > $totalPage) {
             return;
         }
 
-        if ($page > 1) {
-            $url = \config('wrap.url_site.bonbanh') . 'oto/page,'.$page.'/';
-        } else {
-            $url = \config('wrap.url_site.bonbanh');
-        }
+        $url = \config('wrap.url_site.bonbanh') . 'oto/page,'.$page.'/';
 
         $html = $this->loopFetchUrl($url);
         $items = null;
@@ -493,29 +490,32 @@ class BaseController extends Controller
             unset($html);
 
             $pdo = DB::connection()->getPdo();
+            $domain = \config('wrap.url_site.bonbanh');
+
             foreach ($items as $indexL => $item) {
+                $link = trim($item->find('div', 4)->find('a',0)->href);
+                if ($this->type !== 'all') {
+                    $count = Contents::where('type', 'bon_banh')->where('link', $domain . $link)->count();
+                    if (!empty($count)) {
+                        $page = -1;
+                        unset($count);
+                        break;
+                    }
+                }
+
                 $productYear = trim($item->find('div', 0)->innertext());
                 $title = trim($item->find('div', 1)->plaintext); // brand car
                 $price = trim($item->find('div', 2)->innertext());
                 $city = trim($item->find('div', 3)->plaintext);
-                $link = trim($item->find('div', 4)->find('a',0)->href);
                 $carCode = trim($item->find('div', 4)->find('span.car_code', 0)->plaintext);
                 $shortContent = trim($item->find('div', 5)->innertext());
                 $contactAndPhone = trim($item->find('div.cb7', 0)->innertext());
-
-                if ($dataOld !== NULL) {
-                    if ($dataOld->link == $link) {
-                        $page = -1;
-                        break;
-                    }
-                }
 
                 $productYear = $pdo->quote($productYear);
                 $title = $pdo->quote($title);
                 $price = $pdo->quote($price);
                 $city = $pdo->quote($city);
-                $domain = $pdo->quote(\config('wrap.url_site.bonbanh'));
-                $link = $domain . $pdo->quote($link);
+                $link = $pdo->quote($domain . $link);
                 $carCode = $pdo->quote($carCode);
                 $shortContent = $pdo->quote($shortContent);
                 $contactAndPhone = $pdo->quote($contactAndPhone);
@@ -560,15 +560,11 @@ class BaseController extends Controller
         flush();
         ob_flush();
 
-        if ($page == 0) {
+        if ($page <= 0 || $page > $totalPage) {
             return;
         }
 
-        if ($page > 1) {
-            $url = \config('wrap.url_site.muaban') . 'ban-o-to-toan-quoc-l0-c41?cp='.$page;
-        } else {
-            $url = \config('wrap.url_site.muaban') . 'ban-o-to-toan-quoc-l0-c41';
-        }
+        $url = \config('wrap.url_site.muaban') . 'ban-o-to-toan-quoc-l0-c41?cp='.$page;
 
         $html = $this->loopFetchUrl($url);
         $items = null;
@@ -588,40 +584,35 @@ class BaseController extends Controller
             unset($items);
         } else {
             unset($html);
-
             $pdo = DB::connection()->getPdo();
+
             foreach ($items as $indexL => $item) {
-                $title = trim($item->find('a', 1)->find('.mbn-title', 0)->plaintext); // brand car
-                $link = trim($item->find('a', 1)->href);
-                $price = trim($item->find('a', 1)->find('.mbn-price', 0)->plaintext);
-                $city = trim($item->find('a', 1)->find('.mbn-address', 0)->plaintext);
-                $datePost = trim($item->find('a', 1)->find('.mbn-date', 0)->plaintext);
-                $summary = $item->find('a', 1)->find('.mbn-item-summary', 0);
+                $link = trim($item->find('a.mbn-image', 0)->href);
+                if ($this->type !== 'all') {
+                    $count = Contents::where('type', 'mua_ban')->where('link', $link)->count();
+                    if (!empty($count)) {
+                        $page = -1;
+                        unset($count);
+                        break;
+                    }
+                }
+
+                $title = trim(@$item->find('div.mbn-content .mbn-title', 0)->plaintext); // brand car
+                $price = trim(@$item->find('div.mbn-content .mbn-price', 0)->plaintext);
+                $city = trim(@$item->find('div.mbn-content .mbn-address', 0)->plaintext);
+                $datePost = trim(@$item->find('div.mbn-content .mbn-date', 0)->plaintext);
+                $summary = trim(@$item->find('div.mbn-content .mbn-item-summary', 0));
+
                 $shortContent = null;
                 if (is_object($summary)) {
                     $shortContent = trim($summary->innertext());
-                }
-
-                if ($dataOld !== NULL) {
-                    if ($dataOld->link == $link) {
-                        $page = -1;
-                        break;
-                    }
                 }
 
                 $title = $pdo->quote($title);
                 $link = $pdo->quote($link);
                 $price = $pdo->quote($price);
                 $city = $pdo->quote($city);
-                $domain = $pdo->quote(\config('wrap.url_site.muaban'));
 
-                if (!empty($datePost)) {
-                    $date = \DateTime::createFromFormat('d/m/Y', $datePost);
-                    $datePost = $date->format('Y-m-d');
-                    $datePost = $pdo->quote($datePost);
-                } else {
-                    $datePost = NULL;
-                }
                 $shortContent = $pdo->quote($shortContent);
 
                 $createdAt = date('Y-m-d H:i:s');
@@ -663,6 +654,9 @@ class BaseController extends Controller
         echo 'Page: ' . $page . '<br/>';
         flush();
         ob_flush();
+        if ($page <= 0 || $page > $totalPage) {
+            return;
+        }
 
         $url = \config('wrap.url_site.otovietnam');
 
@@ -689,8 +683,17 @@ class BaseController extends Controller
             $domain = \config('wrap.url_site.otovietnam');
 
             foreach ($items as $indexL => $item) {
-                $title = trim(@$item->find('a', 1)->plaintext); // brand car
                 $link = trim(@$item->find('a', 1)->href);
+                if ($this->type !== 'all') {
+                    $count = Contents::where('type', 'otovietnam')->where('link', $domain . $link)->count();
+                    if (!empty($count)) {
+                        $page = -1;
+                        unset($count);
+                        break;
+                    }
+                }
+
+                $title = trim(@$item->find('a', 1)->plaintext); // brand car
                 $price = trim(@$item->find('.threadPrice', 0)->plaintext);
                 $atrDatePost = @$item->find('.threadDate abbr', 0)->attr;
                 $kmRun = trim(@$item->find('.threadOdo', 0)->plaintext);
@@ -702,13 +705,6 @@ class BaseController extends Controller
                 $color = isset($details['color']) ? $details['color'] : null;
                 $productYear = isset($details['productYear']) ? $details['productYear'] : null;
                 $shortContent = isset($details['shortContent']) ? $details['shortContent'] : null;
-
-                if ($dataOld !== NULL) {
-                    if ($dataOld->link == $domain . $link) {
-                        $page = -1;
-                        break;
-                    }
-                }
 
                 $title = $pdo->quote($title);
                 $link = $pdo->quote($domain . $link);
@@ -744,15 +740,7 @@ class BaseController extends Controller
                 unset($data);
             }
         }
-
-        if ($page > 0 || $page < $totalPage) {
-            if ($dataOld === NULL) {
-                $page--;
-            } else {
-                $page++;
-            }
-            $this->getContentCarmudi($page, $totalPage, $dataOld);
-        }
+        return;
     }
 
     protected function getContentCarmudi($page, $totalPage, $dataOld)
@@ -760,6 +748,10 @@ class BaseController extends Controller
         echo 'Page: ' . $page . '<br/>';
         flush();
         ob_flush();
+
+        if ($page <= 0 || $page > $totalPage) {
+            return;
+        }
 
         $url = \config('wrap.url_site.carmudi') . 'all/?sort=suggested&page='.$page;
 
@@ -787,8 +779,17 @@ class BaseController extends Controller
             $domain = substr($domain, 0, -1);
 
             foreach ($items as $indexL => $item) {
-                $title = trim($item->find('.catalog-listing-description-data a', 0)->plaintext); // brand car
                 $link = trim($item->find('.catalog-listing-description-data a', 0)->href);
+                if ($this->type !== 'all') {
+                    $count = Contents::where('type', 'carmudi')->where('link', $domain . $link)->count();
+                    if (!empty($count)) {
+                        $page = -1;
+                        unset($count);
+                        break;
+                    }
+                }
+
+                $title = trim($item->find('.catalog-listing-description-data a', 0)->plaintext); // brand car
                 $price = trim($item->find('.catalog-listing-description-data .item-price a', 0)->plaintext);
                 $city = trim($item->find('.catalog-listing-description-dealer-info .catalog-listing-item-location span', 0)->plaintext);
                 $contact = trim($item->find('.catalog-listing-description-dealer-info .catalog-listing-item-agent', 0)->plaintext);
@@ -800,13 +801,6 @@ class BaseController extends Controller
                 $phone = null;
                 if (!empty($sku)) {
                     $phone = $this->getDetailCarmudi($domain, $sku);
-                }
-
-                if ($dataOld !== NULL) {
-                    if ($dataOld->link == $domain . $link) {
-                        $page = -1;
-                        break;
-                    }
                 }
 
                 $title = $pdo->quote($title);
@@ -856,6 +850,9 @@ class BaseController extends Controller
         echo 'Page: ' . $page . '<br/>';
         flush();
         ob_flush();
+        if ($page <= 0 || $page > $totalPage) {
+            return;
+        }
 
         $url = \config('wrap.url_site.banxehoi') . 'ban-xe/p'.$page;
 
@@ -883,28 +880,31 @@ class BaseController extends Controller
             $domain = substr($domain, 0, -1);
 
             foreach ($items as $indexL => $item) {
-                $title = trim(@$item->find('.info .opensanslistauto', 0)->plaintext); // brand car
                 $link = trim(@$item->find('.info .opensanslistauto', 0)->href);
+                if ($this->type !== 'all') {
+                    $count = Contents::where('type', 'ban_xe_hoi')->where('link', $domain . $link)->count();
+                    if (!empty($count)) {
+                        $page = -1;
+                        unset($count);
+                        break;
+                    }
+                }
+
+                $title = trim(@$item->find('.info .opensanslistauto', 0)->plaintext); // brand car
                 $price = trim(@$item->find('.info .pricenew', 0)->plaintext);
                 $city = trim(@$item->find('.contactinfo .city a', 0)->plaintext);
                 $phone = trim(@$item->find('.contactinfo .mobile', 0)->plaintext);
                 $phone = str_replace('-', ',', $phone);
                 $productYear = trim(@$item->find('.detailinfo .year', 0)->plaintext);
                 $datePost = trim(@$item->find('.info .newdate', 0)->plaintext);
+                $shortContent = trim(@$item->find('.info', 0)->innertext());
 
                 // Get Phone number detail
-                $shortContent = null;
-                if (!empty($link)) {
-                    $temps = $this->getDetailBanXeHoi($domain . $link);
-                    $shortContent = isset($temps['shortContent']) ? $temps['shortContent'] : null;
-                }
-
-                if ($dataOld !== NULL) {
-                    if ($dataOld->link == $domain . $link) {
-                        $page = -1;
-                        break;
-                    }
-                }
+//                $shortContent = null;
+//                if (!empty($link)) {
+//                    $temps = $this->getDetailBanXeHoi($domain . $link);
+//                    $shortContent = isset($temps['shortContent']) ? $temps['shortContent'] : null;
+//                }
 
                 $title = $pdo->quote($title);
                 $link = $pdo->quote($domain . $link);
@@ -913,7 +913,7 @@ class BaseController extends Controller
                 $phone = $pdo->quote($phone);
                 $productYear = $pdo->quote($productYear);
                 $shortContent = $pdo->quote($shortContent);
-                $datePost = $pdo->quote($this->formatDate($datePost));
+                $datePost = $pdo->quote($datePost);
 
                 $createdAt = date('Y-m-d H:i:s');
                 $data[] = "($link, $title, $price, $phone, $city, $productYear, $datePost, $shortContent, 'ban_xe_hoi', \"$createdAt\")";
@@ -951,6 +951,9 @@ class BaseController extends Controller
 
     protected function getContentChoXe($page, $totalPage, $dataOld)
     {
+        if ($page <= 0 || empty($page) || $page > $totalPage) {
+            return;
+        }
         echo 'Page: ' . $page . '<br/>';
         flush();
         ob_flush();
@@ -981,26 +984,30 @@ class BaseController extends Controller
             $domain = substr($domain, 0, -1);
 
             foreach ($items as $indexL => $item) {
-                $title = trim(@$item->find('.info-car h2 a', 0)->plaintext); // brand car
                 $link = trim(@$item->find('.info-car h2 a', 0)->href);
+                if ($this->type !== 'all') {
+                    $count = Contents::where('type', 'cho_xe')->where('link', $domain . $link)->count();
+                    if (!empty($count)) {
+                        $page = -1;
+                        unset($count);
+                        break;
+                    }
+                }
+
+                $title = trim(@$item->find('.info-car h2 a', 0)->plaintext); // brand car
                 $price = trim(@$item->find('.info-car .pricenew', 0)->plaintext);
                 $city = trim(@$item->find('.detailinfo .madein', 0)->plaintext);
                 $phone = trim(@$item->find('.info-car .call-horizontal', 0)->plaintext);
                 $productYear = trim(@$item->find('.detailinfo .year', 0)->plaintext);
+                $shortContent = trim(@$item->find('.info-car', 0)->innertext());
 
                 // Get Phone number detail
+                /*
                 $shortContent = null;
                 if (!empty($link)) {
                     $temps = $this->getDetailChoXe($domain . $link);
                     $shortContent = isset($temps['shortContent']) ? $temps['shortContent'] : null;
-                }
-
-                if ($dataOld !== NULL) {
-                    if ($dataOld->link == $domain . $link) {
-                        $page = -1;
-                        break;
-                    }
-                }
+                }*/
 
                 $title = $pdo->quote($title);
                 $link = $pdo->quote($domain . $link);
@@ -1011,7 +1018,7 @@ class BaseController extends Controller
                 $shortContent = $pdo->quote($shortContent);
 
                 $createdAt = date('Y-m-d H:i:s');
-                $data[] = "($link, $title, $price, $phone, $city, $productYear, $shortContent, 'ban_xe_hoi', \"$createdAt\")";
+                $data[] = "($link, $title, $price, $phone, $city, $productYear, $shortContent, 'cho_xe', \"$createdAt\")";
 
                 $items[$indexL]->clear();
             }
@@ -1046,6 +1053,9 @@ class BaseController extends Controller
 
     protected function getContentXe360($page, $totalPage, $dataOld)
     {
+        if ($page <= 0 || empty($page) || $page > $totalPage) {
+            return;
+        }
         echo 'Page: ' . $page . '<br/>';
         flush();
         ob_flush();
@@ -1076,8 +1086,17 @@ class BaseController extends Controller
             $domain = substr($domain, 0, -1);
 
             foreach ($items as $indexL => $item) {
-                $title = trim(@$item->find('.item-main h2 a', 0)->plaintext); // brand car
                 $link = trim(@$item->find('.item-main h2 a', 0)->href);
+                if ($this->type !== 'all') {
+                    $count = Contents::where('type', 'xe_360')->where('link', $domain . $link)->count();
+                    if (!empty($count)) {
+                        $page = -1;
+                        unset($count);
+                        break;
+                    }
+                }
+
+                $title = trim(@$item->find('.item-main h2 a', 0)->plaintext); // brand car
                 $price = trim(@$item->find('.item-main .content .vprice', 0)->plaintext);
                 $price = trim(str_replace('Giá bán:', '', $price));
                 $city = trim(@$item->find('.item-main .footer', 0)->plaintext);
@@ -1095,19 +1114,16 @@ class BaseController extends Controller
                 $tempYear = explode('|', $tempYear);
                 $productYear = isset($tempYear[0]) ? $tempYear[0] : null;
 
+                $shortContent = trim(@$item->find('.item-main', 0)->innertext());
                 // Get Phone number detail
+                /*
                 $shortContent = null;
                 if (!empty($link)) {
                     $temps = $this->getDetailXe360($domain . $link);
                     $shortContent = isset($temps['shortContent']) ? $temps['shortContent'] : null;
                 }
-
-                if ($dataOld !== NULL) {
-                    if ($dataOld->link == $domain . $link) {
-                        $page = -1;
-                        break;
-                    }
-                }
+                 * 
+                 */
 
                 $title = $pdo->quote($title);
                 $link = $pdo->quote($domain . $link);
@@ -1154,6 +1170,9 @@ class BaseController extends Controller
 
     protected function getContentXe5Giay($page, $totalPage, $dataOld)
     {
+        if ($page <= 0 || empty($page) || $page > $totalPage) {
+            return;
+        }
         echo 'Page: ' . $page . '<br/>';
         flush();
         ob_flush();
@@ -1183,26 +1202,27 @@ class BaseController extends Controller
             $domain = \config('wrap.url_site.xe5giay');
 
             foreach ($items as $indexL => $item) {
-                $title = trim(@$item->find('.main .title a', 0)->plaintext); // brand car
                 $link = trim(@$item->find('.main .title a', 0)->href);
-                $datePost = trim(@$item->find('.main .secondRow .DateTime', 0)->plaintext);
-                if (!empty($datePost)) {
-                    $date = $this->convertDate5Giay($datePost);
-                    $datePost = $this->formatDate($date);
+                if ($this->type !== 'all') {
+                    $count = Contents::where('type', 'xe_5giay')->where('link', $domain . $link)->count();
+                    if (!empty($count)) {
+                        $page = -1;
+                        unset($count);
+                        break;
+                    }
                 }
 
+                $title = trim(@$item->find('.main .title a', 0)->plaintext); // brand car
+                $datePost = trim(@$item->find('.main .secondRow .DateTime', 0)->plaintext);
+
+                $shortContent = trim(@$item->find('.listBlock', 0)->innertext());
+                /*
                 $shortContent = null;
                 if (!empty($link)) {
                     $temps = $this->getDetailXe5Giay($domain . $link);
                     $shortContent = isset($temps['shortContent']) ? $temps['shortContent'] : null;
-                }
-
-                if ($dataOld !== NULL) {
-                    if ($dataOld->link == $domain . $link) {
-                        $page = -1;
-                        break;
-                    }
-                }
+                }*/
+                
 
                 $title = $pdo->quote($title);
                 $link = $pdo->quote($domain . $link);
@@ -1244,6 +1264,9 @@ class BaseController extends Controller
 
     protected function getContentSanOtoVn($page, $totalPage, $dataOld)
     {
+        if ($page <= 0 || empty($page) || $page > $totalPage) {
+            return;
+        }
         echo 'Page: ' . $page . '<br/>';
         flush();
         ob_flush();
@@ -1274,8 +1297,17 @@ class BaseController extends Controller
             $domain = substr($domain, 0, -1);
 
             foreach ($items as $indexL => $item) {
-                $title = trim(@$item->find('.item-info a', 0)->plaintext); // brand car
                 $link = trim(@$item->find('.item-info a', 0)->href);
+                if ($this->type !== 'all') {
+                    $count = Contents::where('type', 'san_oto')->where('link', $domain . $link)->count();
+                    if (!empty($count)) {
+                        $page = -1;
+                        unset($count);
+                        break;
+                    }
+                }
+
+                $title = trim(@$item->find('.item-info a', 0)->plaintext); // brand car
 
                 $price = trim(@$item->find('.price', 0)->plaintext);
                 $price = trim(str_replace('Giá bán:', '', $price));
@@ -1295,12 +1327,6 @@ class BaseController extends Controller
                     $runKm = isset($temps['runKm']) ? $temps['runKm'] : null;
                 }
 
-                if ($dataOld !== NULL) {
-                    if ($dataOld->link == $domain . $link) {
-                        $page = -1;
-                        break;
-                    }
-                }
                 $title = $pdo->quote($title);
                 $link = $pdo->quote($domain . $link);
                 $phone = $pdo->quote($phone);
@@ -1347,6 +1373,9 @@ class BaseController extends Controller
 
     protected function getContentMuaBanOto($page, $totalPage, $dataOld)
     {
+        if ($page <= 0 || empty($page) || $page > $totalPage) {
+            return;
+        }
         echo 'Page: ' . $page . '<br/>';
         flush();
         ob_flush();
@@ -1356,7 +1385,7 @@ class BaseController extends Controller
         $html = $this->loopFetchUrl($url);
         $items = null;
         if (is_object($html)) {
-            $items = @$html->find('.newCar .div2 tr');
+            $items = @$html->find('.newCar .div2 table tr');
         }
 
         $data = array();
@@ -1379,7 +1408,7 @@ class BaseController extends Controller
             foreach ($items as $indexL => $item) {
 
                 for ($i = 0; $i < 4; $i ++) {
-                    $obj = $item->find('td', $i);
+                    $obj = $item->find('td[valign="top"]', $i);
                     if (!is_object($obj)) {
                         continue;
                     }
@@ -1388,12 +1417,16 @@ class BaseController extends Controller
                     $link = null;
                     if (is_object($xx)) {
                         $link = $xx->find('a', 0)->href;
+                        unset($xx);
                     }
+
                     $tip = $obj->find('div', 2);
 
-                    if ($dataOld !== NULL) {
-                        if ($dataOld->link == $domain . $link) {
+                    if ($this->type !== 'all') {
+                        $count = Contents::where('type', 'muaban_oto')->where('link', $domain . $link)->count();
+                        if (!empty($count)) {
                             $page = -1;
+                            unset($count);
                             break;
                         }
                     }
@@ -1405,6 +1438,7 @@ class BaseController extends Controller
                         $contact = $tip->find('tr', 7)->find('td', 1)->plaintext;
                         $city = $tip->find('tr', 8)->find('td', 1)->plaintext;
                         $phone = $tip->find('tr', 9)->find('td', 1)->plaintext;
+                        unset($tip);
                     }
 
                     $title = $pdo->quote($title);
@@ -1450,6 +1484,9 @@ class BaseController extends Controller
 
     protected function getContentMuaBanNhanh($page, $totalPage, $dataOld)
     {
+        if ($page <= 0 || empty($page) || $page > $totalPage) {
+            return;
+        }
         echo 'Page: ' . $page . '<br/>';
         flush();
         ob_flush();
@@ -1476,24 +1513,26 @@ class BaseController extends Controller
             unset($html);
 
             $pdo = DB::connection()->getPdo();
-            $domain = \config('wrap.url_site.muabannhanh');
-            $domain = substr($domain, 0, -1);
 
             foreach ($items as $indexL => $item) {
-                $title = @$item->find('.block-summary a', 0)->plaintext;
                 $link = @$item->find('.block-summary a', 0)->href;
+                if ($this->type !== 'all') {
+                    $count = Contents::where('type', 'muaban_nhanh')->where('link', $link)->count();
+                    if (!empty($count)) {
+                        $page = -1;
+                        unset($count);
+                        break;
+                    }
+                }
+
+                $title = @$item->find('.block-summary a', 0)->plaintext;
                 $price = @$item->find('.block-summary .box-price .price-new', 0)->plaintext;
                 $district = @$item->find('.block-summary .quick-view a', 0)->plaintext;
                 $city = @$item->find('.block-summary .quick-view a', 1)->plaintext;
                 $shortContent = @$item->find('.block-summary .create-content-more', 0)->plaintext;
                 $phone = @$item->find('.box-footer span.no-display', 0)->plaintext;
                 $phone = str_replace(' ', '', $phone);
-                if ($dataOld !== NULL) {
-                    if ($dataOld->link == $link) {
-                        $page = -1;
-                        break;
-                    }
-                }
+
                 $title = $pdo->quote($title);
                 $link = $pdo->quote($link);
                 $price = $pdo->quote($price);
@@ -1537,6 +1576,9 @@ class BaseController extends Controller
 
     protected function getContentRongBay($page, $totalPage, $dataOld)
     {
+        if ($page <= 0 || empty($page) || $page > $totalPage) {
+            return;
+        }
         echo 'Page: ' . $page . '<br/>';
         flush();
         ob_flush();
@@ -1565,8 +1607,16 @@ class BaseController extends Controller
             $pdo = DB::connection()->getPdo();
 
             foreach ($items as $indexL => $item) {
-                $title = @$item->find('.h3_car_title a', 0)->plaintext;
                 $link = @$item->find('.h3_car_title a', 0)->href;
+                if ($this->type !== 'all') {
+                    $count = Contents::where('type', 'rong_bay')->where('link', $link)->count();
+                    if (!empty($count)) {
+                        $page = -1;
+                        unset($count);
+                        break;
+                    }
+                }
+                $title = @$item->find('.h3_car_title a', 0)->plaintext;
                 $price = @$item->find('.param .param_right', 0)->plaintext;
                 $price = str_replace('Giá:', '', $price);
                 $cityDatePost = @$item->find('.headInfo .city_left_', 0)->plaintext;
@@ -1579,14 +1629,9 @@ class BaseController extends Controller
                 $shortContent = null;
                 if (is_object($shortContentObj)) {
                     $shortContent = $shortContentObj->innertext();
+                    unset($shortContentObj);
                 }
 
-                if ($dataOld !== NULL) {
-                    if ($dataOld->link == $link) {
-                        $page = -1;
-                        break;
-                    }
-                }
                 $title = $pdo->quote($title);
                 $link = $pdo->quote($link);
                 $price = $pdo->quote($price);
@@ -1633,6 +1678,9 @@ class BaseController extends Controller
 
     protected function getContentEnBac($page, $totalPage, $dataOld)
     {
+        if ($page <= 0 || empty($page) || $page > $totalPage) {
+            return;
+        }
         echo 'Page: ' . $page . '<br/>';
         flush();
         ob_flush();
@@ -1662,22 +1710,27 @@ class BaseController extends Controller
 
             foreach ($items as $indexL => $item) {
                 $attrs = @$item->attr;
-                $title = @$item->find('a', 0)->plaintext;
                 $link = isset($attrs['data-link']) ? $attrs['data-link'] : null;
+                if ($this->type !== 'all') {
+                    $count = Contents::where('type', 'en_bac')->where('link', $link)->count();
+                    if (!empty($count)) {
+                        $page = -1;
+                        unset($count);
+                        break;
+                    }
+                }
+
+                $title = @$item->find('a', 0)->plaintext;
                 $phone = isset($attrs['data-phones']) ? $attrs['data-phones'] : null;
                 $price = @$item->find('.iphone_timeup .price_r span', 0)->plaintext;
                 $contact = @$item->find('.iuser a', 1)->plaintext;
                 $city = @$item->find('.iuaddress span', 0)->plaintext;
                 $datePost = @$item->find('.icity_view .icity span', 1)->plaintext;
 
-                $temps = $this->getDetailEnBac($link);
-                $shortContent = isset($temps['shortContent']) ? $temps['shortContent'] : null;
-                if ($dataOld !== NULL) {
-                    if ($dataOld->link == $link) {
-                        $page = -1;
-                        break;
-                    }
-                }
+                //$temps = $this->getDetailEnBac($link);
+                //$shortContent = isset($temps['shortContent']) ? $temps['shortContent'] : null;
+                $shortContent = null;
+
                 $title = $pdo->quote($title);
                 $link = $pdo->quote($link);
                 $price = $pdo->quote($price);
@@ -1723,6 +1776,9 @@ class BaseController extends Controller
 
     protected function getContentTheGioiXeOto($page, $totalPage, $dataOld)
     {
+        if ($page <= 0 || empty($page) || $page > $totalPage) {
+            return;
+        }
         echo 'Page: ' . $page . '<br/>';
         flush();
         ob_flush();
@@ -1753,11 +1809,20 @@ class BaseController extends Controller
 
             foreach ($items as $indexL => $item) {
 
+                $link = @$item->find('td', 1)->find('a', 0)->href;
+                if ($this->type !== 'all') {
+                    $count = Contents::where('type', 'thegioixe_oto')->where('link', $link)->count();
+                    if (!empty($count)) {
+                        $page = -1;
+                        unset($count);
+                        break;
+                    }
+                }
+
                 $productYear = @$item->find('td', 0)->find('strong', 0)->plaintext;
                 $codeCarSite = @$item->find('td', 0)->find('div', 0)->plaintext;
 
                 $title = @$item->find('td', 1)->find('a', 0)->plaintext;
-                $link = @$item->find('td', 1)->find('a', 0)->href;
                 $shortContent = @$item->find('td', 1)->plaintext;
 
                 $price = @$item->find('td', 2)->find('.price', 0)->plaintext;
@@ -1773,14 +1838,9 @@ class BaseController extends Controller
                     $phone = isset($parts[2]) ? $parts[2] : null;
                     $phone = str_replace('ĐT: ', '', $phone);
                     $phone = str_replace('-', ',', $phone);
+                    unset($temps);
                 }
 
-                if ($dataOld !== NULL) {
-                    if ($dataOld->link == $link) {
-                        $page = -1;
-                        break;
-                    }
-                }
                 $codeCarSite = $pdo->quote($codeCarSite);
                 $title = $pdo->quote($title);
                 $link = $pdo->quote($link);
@@ -1828,6 +1888,9 @@ class BaseController extends Controller
 
     protected function getContentOtoThien($page, $totalPage, $dataOld)
     {
+        if ($page <= 0 || empty($page) || $page > $totalPage) {
+            return;
+        }
         echo 'Page: ' . $page . '<br/>';
         flush();
         ob_flush();
@@ -1861,8 +1924,17 @@ class BaseController extends Controller
 
             foreach ($items as $indexL => $item) {
 
-                $price = @$item->find('.meta-top .normal-price', 0)->plaintext;
                 $link = @$item->find('.title a', 0)->href;
+                if ($this->type !== 'all') {
+                    $count = Contents::where('type', 'oto_thien')->where('link', $link)->count();
+                    if (!empty($count)) {
+                        $page = -1;
+                        unset($count);
+                        break;
+                    }
+                }
+
+                $price = @$item->find('.meta-top .normal-price', 0)->plaintext;
                 $title = @$item->find('.title a', 0)->plaintext;
 
                 $kmRun  = @$item->find('.meta-middle-row', 0)->find('.mileage .value', 0)->plaintext;
@@ -1879,12 +1951,6 @@ class BaseController extends Controller
                     }
                 }
 
-                if ($dataOld !== NULL) {
-                    if ($dataOld->link == $link) {
-                        $page = -1;
-                        break;
-                    }
-                }
                 $title = $pdo->quote($title);
                 $link = $pdo->quote($link);
                 $price = $pdo->quote($price);
@@ -1930,6 +1996,9 @@ class BaseController extends Controller
 
     protected function getContentCafeAuto($page, $totalPage, $dataOld)
     {
+        if ($page <= 0 || empty($page) || $page > $totalPage) {
+            return;
+        }
         echo 'Page: ' . $page . '<br/>';
         flush();
         ob_flush();
@@ -1963,8 +2032,17 @@ class BaseController extends Controller
 
             foreach ($items as $indexL => $item) {
 
-                $title = @$item->find('.loph1 a', 0)->plaintext;
                 $link = @$item->find('.loph1 a', 0)->href;
+                if ($this->type !== 'all') {
+                    $count = Contents::where('type', 'cafe_auto')->where('link', $link)->count();
+                    if (!empty($count)) {
+                        $page = -1;
+                        unset($count);
+                        break;
+                    }
+                }
+
+                $title = @$item->find('.loph1 a', 0)->plaintext;
                 $price = @$item->find('div', 2)->find('.left-gia', 0)->plaintext;
                 $city = @$item->find('div', 2)->find('.right-gia', 0)->plaintext;
                 $productYear = @$item->find('div', 1)->find('.lopline', 2)->plaintext;
@@ -1973,12 +2051,6 @@ class BaseController extends Controller
                 $phone = str_replace(array("showfullphone(this,'", "')"), '', $phone);
                 $contact = @$item->find('.lopline', 6)->plaintext;
 
-                if ($dataOld !== NULL) {
-                    if ($dataOld->link == $link) {
-                        $page = -1;
-                        break;
-                    }
-                }
                 $title = $pdo->quote($title);
                 $link = $pdo->quote($link);
                 $price = $pdo->quote($price);
@@ -2171,7 +2243,12 @@ class BaseController extends Controller
             unset($items);
         } else {
             $results = array();
-            $results['shortContent'] = trim(@$html->find('.controls', 0)->innertext());
+            $objContent = @$html->find('.controls', 0);
+            $content = null;
+            if (is_object($objContent)) {
+                $content = trim($objContent->innertext());
+            }
+            $results['shortContent'] = $content;
 
             unset($html);
             return $results;

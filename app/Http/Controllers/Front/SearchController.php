@@ -72,7 +72,6 @@ class SearchController extends Controller
 //        $offset = ($page * $perPage) - $perPage;
 
         $keyword = $request->get('keyword');
-
         $content = new \App\Models\Contents();
         $pagination = $content->getContent($keyword);
 

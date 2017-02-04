@@ -14,20 +14,77 @@ class Contents extends Model
     {
         $query = DB::table($this->table);
         if (!empty($keyword)) {
-            $query->where('brand_car', 'LIKE', "%{$keyword}%");
-            $query->orWhere('code_car_site', 'LIKE', "%{$keyword}%");
-            $query->orWhere('color', 'LIKE', "%{$keyword}%");
-            $query->orWhere('km_run', 'LIKE', "%{$keyword}%");
-            $query->orWhere('product_year', 'LIKE', "%{$keyword}%");
-            $query->orWhere('price', 'LIKE', "%{$keyword}%");
-            $query->orWhere('contact', 'LIKE', "%{$keyword}%");
-            $query->orWhere('phone', 'LIKE', "%{$keyword}%");
-            $query->orWhere('city', 'LIKE', "%{$keyword}%");
-            $query->orWhere('short_content', 'LIKE', "%{$keyword}%");
+            $parts = $this->seoUrl($keyword);
+            $parts = explode('-', $parts);
+//            var_dump($parts);exit;
+            if (count($parts)) {
+                $query->where(function($query) use ($parts) {
+                    foreach ($parts as $part) {
+                        $query->where('brand_car', 'LIKE', "%{$part}%");
+                    }
+                });
+                $query->orWhere(function($query) use ($parts) {
+                    foreach ($parts as $part) {
+                        $query->where('code_car_site', 'LIKE', "%{$part}%");
+                    }
+                });
+                $query->orWhere(function($query) use ($parts) {
+                    foreach ($parts as $part) {
+                        $query->where('color', 'LIKE', "%{$part}%");
+                    }
+                });
+                $query->orWhere(function($query) use ($parts) {
+                    foreach ($parts as $part) {
+                        $query->where('km_run', 'LIKE', "%{$part}%");
+                    }
+                });
+                $query->orWhere(function($query) use ($parts) {
+                    foreach ($parts as $part) {
+                        $query->where('product_year', 'LIKE', "%{$part}%");
+                    }
+                });
+                $query->orWhere(function($query) use ($parts) {
+                    foreach ($parts as $part) {
+                        $query->where('price', 'LIKE', "%{$part}%");
+                    }
+                });
+                $query->orWhere(function($query) use ($parts) {
+                    foreach ($parts as $part) {
+                        $query->where('contact', 'LIKE', "%{$part}%");
+                    }
+                });
+                $query->orWhere(function($query) use ($parts) {
+                    foreach ($parts as $part) {
+                        $query->where('phone', 'LIKE', "%{$part}%");
+                    }
+                });
+                $query->orWhere(function($query) use ($parts) {
+                    foreach ($parts as $part) {
+                        $query->where('city', 'LIKE', "%{$part}%");
+                    }
+                });
+                $query->orWhere(function($query) use ($parts) {
+                    foreach ($parts as $part) {
+                        $query->where('short_content', 'LIKE', "%{$part}%");
+                    }
+                });
+            }
         } else {
             $query->where('brand_car', '=', "{$keyword}");
         }
 
         return $query->paginate(20);
+    }
+    
+    public function seoUrl($string) {
+        //Lower case everything
+        $string = strtolower($string);
+        //Make alphanumeric (removes all other characters)
+        $string = preg_replace("/[^a-z0-9_\s-]/", "", $string);
+        //Clean up multiple dashes or whitespaces
+        $string = preg_replace("/[\s-]+/", " ", $string);
+        //Convert whitespaces and underscore to dash
+        $string = preg_replace("/[\s_]/", "-", $string);
+        return $string;
     }
 }
