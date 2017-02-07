@@ -3,6 +3,7 @@ namespace App\Http\Controllers\Front;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Front\BaseController;
+use Illuminate\Support\Facades\Mail;
 
 class CronController extends BaseController
 {
@@ -44,6 +45,30 @@ class CronController extends BaseController
 
 
         //$this->addDataToSolr();
+    }
+
+    public function bookAuto(Request $request)
+    {
+        $setting = \App\Models\Settings::where('status', 1)->first();
+        if ($setting === NULL) {
+            echo 'Không có data để setting. Vui lòng setting trước khi chạy cron';
+            exit;
+        }
+        $content = new \App\Models\Contents();
+        $rows = $content->getBookAuto($setting);
+        if ($rows->count() === 0) {
+            echo 'Không có data để send email';
+            exit;
+        }
+        $emailTitle = 'Xe mới nhất...';
+        $toEmail = 'thynguyen222@gmail.com';
+        Mail::send('cron.email', [
+            'setting' => $setting,
+            'data' => $rows], function($message) use ($toEmail, $emailTitle) {
+            $message->to($toEmail, '')->subject($emailTitle);
+        });
+
+        echo "DONE";
     }
 
     protected function addDataToSolr()

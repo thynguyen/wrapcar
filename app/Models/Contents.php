@@ -70,10 +70,40 @@ class Contents extends Model
                 });
             }
         } else {
+            $keyword = 'null';
             $query->where('brand_car', '=', "{$keyword}");
         }
 
         return $query->paginate(20);
+    }
+
+    public function getBookAuto($setting)
+    {
+        $query = DB::table($this->table);
+        $query->where('brand_car', 'LIKE', "%{$setting->brand_car}%");
+        $query->where('brand_car', 'LIKE', "%{$setting->keyword}%");
+        $query->where(function($query) use ($setting) {
+            $query->where('product_year', 'LIKE', "%{$setting->product_year}%");
+            $query->orWhere('brand_car', 'LIKE', "%{$setting->product_year}%");
+        });
+        if (!empty($setting->city)) {
+            $query->where(function($query) use ($setting) {
+                $query->where('city', 'LIKE', "%{$setting->city}%");
+                $query->orWhere('contact', 'LIKE', "%{$setting->city}%");
+            });
+        }
+        if (!empty($setting->color)) {
+            $query->where(function($query) use ($setting) {
+                $query->where('color', 'LIKE', "%{$setting->color}%");
+                $query->orWhere('short_content', 'LIKE', "%{$setting->color}%");
+            });
+        }
+        if (!empty($setting->hop_so)) {
+            $query->where('short_content', 'LIKE', "%{$setting->hop_so}%");
+        }
+        $query->where('created_at', '>', "{$setting->created_at}");
+
+        return $query->get();
     }
     
     public function seoUrl($string) {
