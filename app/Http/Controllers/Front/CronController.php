@@ -60,15 +60,33 @@ class CronController extends BaseController
             echo 'Không có data để send email';
             exit;
         }
+        $config = \App\Models\Config::first();
+        if ($config === NULL) {
+            echo 'Vui lòng setting email';
+            exit;
+        }
+
+        foreach ($rows as $row) {
+            echo '======Information=========<br/>';
+            echo $row->link . '<br/>';
+            flush();
+            ob_flush();
+        }
+
         $emailTitle = 'Xe mới nhất...';
-        $toEmail = 'thynguyen222@gmail.com';
-        Mail::send('cron.email', [
-            'setting' => $setting,
-            'data' => $rows], function($message) use ($toEmail, $emailTitle) {
-            $message->to($toEmail, '')->subject($emailTitle);
-        });
+        $toEmail = $config->value;
+        try {
+            Mail::send('cron.email', [
+                'setting' => $setting,
+                'data' => $rows], function($message) use ($toEmail, $emailTitle) {
+                $message->to($toEmail, '')->subject($emailTitle);
+            });
+        } catch (\Exception $e) {
+            echo 'Không thể send email. Vui lòng liên hệ admin';
+        }
 
         echo "DONE";
+        exit;
     }
 
     protected function addDataToSolr()

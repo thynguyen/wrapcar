@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
+use Validator;
 
 class SearchController extends Controller
 {
@@ -64,7 +65,6 @@ class SearchController extends Controller
 
     public function index(Request $request)
     {
-        $data = array();
 //        $pagination = null;
 
 //        $page = $request->get('page', 1); // Get the current page or default to 1, this is what you miss!
@@ -75,7 +75,80 @@ class SearchController extends Controller
         $content = new \App\Models\Contents();
         $pagination = $content->getContent($keyword);
 
+        $data = array(
+            'keyword' => $keyword,
+            'pagination' => $pagination,
+        );
+        $data = array_merge($data, $this->getSetting($data));
 
-        return view('search.index', ['keyword' => $keyword, 'pagination' => $pagination]);
+        return view('search.index', $data);
+    }
+
+    public function setting(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'brand' => 'required|max:255',
+            'product' => 'required|max:255',
+            'product_year' => 'required|numeric',
+            'status' => 'required|in:0,1',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect('search')
+                        ->withErrors($validator)
+                        ->withInput();
+        }
+
+        $setting = \App\Models\Settings::first();
+        if ($setting === NULL) {
+            $setting = new \App\Models\Settings();
+        }
+        $setting->brand_car = $request->get('brand');
+        $setting->keyword = $request->get('product');
+        $setting->product_year = $request->get('product_year');
+        $setting->city = $request->get('city');
+        $setting->hop_so = $request->get('hop_so');
+        $setting->color = $request->get('color');
+        $setting->status = $request->get('status');
+        $setting->created_at = date('Y-m-d H:i:s');
+        $setting->save();
+
+        $config = \App\Models\Config::first();
+        if ($config === NULL) {
+            $config = new \App\Models\Config();
+        }
+        $config->key = 'email_send';
+        $config->value = $request->get('email');
+        $config->save();
+
+        $request->session()->flash('success', 'Cập nhật data thành công');
+        return redirect('search');
+    }
+
+    protected function getSetting($data)
+    {
+        $setting = \App\Models\Settings::first();
+        $data['setting'] = $setting;
+        $data['config'] = \App\Models\Config::first();
+        $data['brands'] = \config('wrap.brands');
+        $data['hop_so_list'] = \config('wrap.hop_so_list');
+        $data['product_year_list'] = $this->getYear();
+        $data['color_list'] = \config('wrap.color_list');
+        $data['city_list'] = \config('wrap.city_list');
+
+        return $data;
+    }
+
+    protected function getYear()
+    {
+        $arr = array('' => '--Năm sản xuất--');
+        $year = date('Y');
+
+        for ($i = $year; $i > 1989; $i--)
+        {
+            $arr[$i] = $i;
+        }
+        return $arr;
     }
 }
