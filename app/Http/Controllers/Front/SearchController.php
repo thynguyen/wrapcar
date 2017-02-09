@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Validator;
+use Illuminate\Support\Facades\Auth;
 
 class SearchController extends Controller
 {
@@ -86,6 +87,9 @@ class SearchController extends Controller
 
     public function setting(Request $request)
     {
+        if (!Auth::check()) {
+            return redirect(route('home_search'));
+        }
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'brand' => 'required|max:255',
@@ -104,6 +108,8 @@ class SearchController extends Controller
         if ($setting === NULL) {
             $setting = new \App\Models\Settings();
         }
+        $setting->user_id = Auth::id();
+        $setting->email = $request->get('email');
         $setting->brand_car = $request->get('brand');
         $setting->keyword = $request->get('product');
         $setting->product_year = $request->get('product_year');
@@ -113,14 +119,6 @@ class SearchController extends Controller
         $setting->status = $request->get('status');
         $setting->created_at = date('Y-m-d H:i:s');
         $setting->save();
-
-        $config = \App\Models\Config::first();
-        if ($config === NULL) {
-            $config = new \App\Models\Config();
-        }
-        $config->key = 'email_send';
-        $config->value = $request->get('email');
-        $config->save();
 
         $request->session()->flash('success', 'Cập nhật data thành công');
         return redirect('search');

@@ -17,13 +17,29 @@
         <!-- Styles -->
         <style>
             .text-error { color: red; }
+            .box {
+                border-radius: 3px;
+                margin-bottom: 20px;
+                position: relative;
+                width: 100%;
+            }
         </style>
     </head>
     <body>
         <div class="container">
-
+            <div class="col-xs-12" style="margin-bottom: 20px;">
+                @if (Auth::check())
+                    <a href="{{ route('logout') }}" class="btn btn-info">Logout</a>
+                    Xin chào <strong>{{ Auth::user()->name }}</strong>
+                    <a href="" class="btn btn-info pull-right">List book xe</a>
+                @else
+                    <a href="{{ route('auth_login') }}" class="btn btn-info">Login</a>
+                @endif
+            </div>
+            <div style="clear: both;"></div>
             @include('notifications')
             <div class="col-md-6">
+                @if (Auth::check())
                 <div class="box box-info">
                     <div class="box-header with-border"><h2>Thiết lập thông tin gửi tự động</h2></div>
                     <form class="form-horizontal" name="f_setting" id="f_setting" action="{{ route('setting_update') }}" method="POST">
@@ -123,6 +139,7 @@
                         </div>
                     </form>
                 </div>
+                @endif
                 <div class="box box-info" style="margin-top: 5px;">
                     <form name="f" id="f" action="{{ route('search_index') }}" method="GET">
                         <div class="box-body">
@@ -139,28 +156,30 @@
                 </div>
             </div>
 
-            @if (isset($pagination) && count($pagination))
-                @foreach ($pagination as $item)
-                <div style="border-bottom: 1px dotted gray;">
-                    <h3>
-                        <a href="{{ $item->link }}">{{ $item->brand_car }}</a>
-                    </h3>
-                    <h6>
-                        <a href="{{ $item->link }}">{{ $item->link }}</a>
-                    </h6>
-                    <div>Giá: {!! str_replace('Giá:', '', $item->price) !!}</div>
-                    <div>Liên hệ: {{ $item->contact }}</div>
-                    <div>Thành phố: {{ $item->city }}</div>
-                    <div>
-                        {!! substr($item->short_content, 0, 1000) !!}...
+            <div class="col-xs-12">
+                @if (isset($pagination) && count($pagination))
+                    @foreach ($pagination as $item)
+                    <div class="box-body table-responsive no-padding" style="border-bottom: 1px dotted gray;">
+                        <h3>
+                            <a href="{{ $item->link }}">{{ $item->brand_car }}</a>
+                        </h3>
+                        <h6>
+                            <a href="{{ $item->link }}">{{ $item->link }}</a>
+                        </h6>
+                        <div>Giá: {!! str_replace('Giá:', '', $item->price) !!}</div>
+                        <div>Liên hệ: {{ $item->contact }}</div>
+                        <div>Thành phố: {{ $item->city }}</div>
+                        <div>
+                            {!! substr($item->short_content, 0, 1000) !!}...
+                        </div>
                     </div>
-                </div>
-                @endforeach
+                    @endforeach
 
-                <div>
-                    {!! $pagination->appends(['keyword' => $keyword])->render() !!}
-                </div>
-            @endif
+                    <div>
+                        {!! $pagination->appends(['keyword' => $keyword])->render() !!}
+                    </div>
+                @endif
+            </div>
         </div>
         <script>
             $(document).ready(function(){

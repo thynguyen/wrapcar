@@ -11,8 +11,24 @@
 |
 */
 
-Route::get('/', 'Front\HomeController@index')->name('home_index');
+Route::get('/', 'Front\SearchController@index')->name('home_index');
 Route::get('search', 'Front\SearchController@index')->name('search_index');
 Route::post('setting/update', 'Front\SearchController@setting')->name('setting_update');
 Route::get('front/cron', 'Front\CronController@index')->name('front_cron_index');
 Route::get('front/book_auto', 'Front\CronController@bookAuto')->name('front_cron_book_auto');
+
+Route::match(['get', 'post'], '/login', 'Auth\LoginController@login')->name('auth_login');
+Route::get('logout', 'Auth\LoginController@logout')->name('logout');
+
+Route::group(array('prefix' => 'admin'), function () {
+
+    Route::get('dashboard', 'Admin\HomeController@index')->name('admin_dashboard');
+    Route::match(['get', 'post'], 'profile/edit', 'Admin\UserProfileController@edit')->name('admin_profile_edit');
+
+    // Manage user
+    Route::get('user-manage', 'Admin\UserManageController@index')->name('admin_user_manage');
+    Route::match(['get', 'post'], 'user-manage/edit','Admin\UserManageController@edit')->name('admin_user_edit');
+    Route::match(['get', 'post'], 'user-manage/add', 'Admin\UserManageController@add')->name('admin_user_create');
+    Route::post('user-manage/delete', 'Admin\UserManageController@delete')->name('admin_user_delete');
+
+});
