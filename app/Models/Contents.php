@@ -80,28 +80,30 @@ class Contents extends Model
     public function getBookAuto($setting)
     {
         $query = DB::table($this->table);
-        $query->where('brand_car', 'LIKE', "%{$setting->brand_car}%");
-        $query->where('brand_car', 'LIKE', "%{$setting->keyword}%");
+        $query->select('link');
+
+        $query->where('brand_car', 'LIKE', "%{$setting['brand_car']}%");
+        $query->where('brand_car', 'LIKE', "%{$setting['keyword']}%");
         $query->where(function($query) use ($setting) {
-            $query->where('product_year', 'LIKE', "%{$setting->product_year}%");
-            $query->orWhere('brand_car', 'LIKE', "%{$setting->product_year}%");
+            $query->where('product_year', 'LIKE', "%{$setting['product_year']}%");
+            $query->orWhere('brand_car', 'LIKE', "%{$setting['product_year']}%");
         });
-        if (!empty($setting->city)) {
+        if (!empty($setting['city'])) {
             $query->where(function($query) use ($setting) {
-                $query->where('city', 'LIKE', "%{$setting->city}%");
-                $query->orWhere('contact', 'LIKE', "%{$setting->city}%");
+                $query->where('city', 'LIKE', "%{$setting['city']}%");
+                $query->orWhere('contact', 'LIKE', "%{$setting['city']}%");
             });
         }
-        if (!empty($setting->color)) {
+        if (!empty($setting['color'])) {
             $query->where(function($query) use ($setting) {
-                $query->where('color', 'LIKE', "%{$setting->color}%");
-                $query->orWhere('short_content', 'LIKE', "%{$setting->color}%");
+                $query->where('color', 'LIKE', "%{$setting['color']}%");
+                $query->orWhere('short_content', 'LIKE', "%{$setting['color']}%");
             });
         }
-        if (!empty($setting->hop_so)) {
-            $query->where('short_content', 'LIKE', "%{$setting->hop_so}%");
+        if (!empty($setting['hop_so'])) {
+            $query->where('short_content', 'LIKE', "%{$setting['hop_so']}%");
         }
-        $query->where('created_at', '>', "{$setting->created_at}");
+        $query->where('updated_at', '>', "{$setting['updated_at']}");
 
         return $query->get();
     }

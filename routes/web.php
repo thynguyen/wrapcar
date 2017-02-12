@@ -10,17 +10,21 @@
 | to using a Closure or controller method. Build something great!
 |
 */
-
 Route::get('/', 'Front\SearchController@index')->name('home_index');
-Route::get('search', 'Front\SearchController@index')->name('search_index');
-Route::post('setting/update', 'Front\SearchController@setting')->name('setting_update');
+Route::get('/search', 'Front\SearchController@index')->name('search_index');
+Route::match(['get', 'post'], '/login', 'Auth\LoginController@login')->name('auth_login');
+Route::get('logout', 'Auth\LoginController@logout')->name('logout');
 Route::get('front/cron', 'Front\CronController@index')->name('front_cron_index');
 Route::get('front/book_auto', 'Front\CronController@bookAuto')->name('front_cron_book_auto');
 
-Route::match(['get', 'post'], '/login', 'Auth\LoginController@login')->name('auth_login');
-Route::get('logout', 'Auth\LoginController@logout')->name('logout');
+Route::group(['prefix' => 'sale', 'middleware' => 'auth.sale'], function () {
+    Route::get('setting', 'Front\SettingController@index')->name('setting_index');
+    Route::get('setting/edit/{setting_id}', 'Front\SettingController@edit')->name('setting_edit');
+    Route::post('setting/update', 'Front\SettingController@update')->name('setting_update');
+    Route::get('setting/delete/{setting_id}', 'Front\SettingController@delete')->name('setting_delete');
+});
 
-Route::group(array('prefix' => 'admin'), function () {
+Route::group(['prefix' => 'admin', 'middleware' => 'auth.admin'], function () {
 
     Route::get('dashboard', 'Admin\HomeController@index')->name('admin_dashboard');
     Route::match(['get', 'post'], 'profile/edit', 'Admin\UserProfileController@edit')->name('admin_profile_edit');

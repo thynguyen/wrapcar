@@ -41,10 +41,6 @@
                                 @endif
                             </div>
                             <div class="form-group">
-                                <label>Quyền: </label>
-                                <label class="control-label">{{ $user->role_name }}</label>
-                            </div>
-                            <div class="form-group">
                                 <label>Trạng thái: </label>
                                 <label class="control-label">
                                     @if($user->status === 1)

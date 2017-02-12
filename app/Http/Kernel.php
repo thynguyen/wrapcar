@@ -36,6 +36,12 @@ class Kernel extends HttpKernel
             'throttle:60,1',
             'bindings',
         ],
+        'auth.sale' => [
+            \App\Http\Middleware\CheckSale::class
+        ],
+        'auth.admin' => [
+            \App\Http\Middleware\CheckAdmin::class
+        ],
     ];
 
     /**

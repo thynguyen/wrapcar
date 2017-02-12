@@ -49,41 +49,86 @@ class CronController extends BaseController
 
     public function bookAuto(Request $request)
     {
-        $setting = \App\Models\Settings::where('status', 1)->first();
-        if ($setting === NULL) {
+        echo 'Item empty <br/>';
+        echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
+        echo '=========================================================================<br/>';
+        flush();
+        ob_flush();
+
+        $settings = \App\Models\Settings::where('status', 1)->get();
+        if ($settings === NULL) {
             echo 'Không có data để setting. Vui lòng setting trước khi chạy cron';
             exit;
         }
-        $content = new \App\Models\Contents();
-        $rows = $content->getBookAuto($setting);
-        if ($rows->count() === 0) {
-            echo 'Không có data để send email';
-            exit;
-        }
-        $config = \App\Models\Config::first();
-        if ($config === NULL) {
-            echo 'Vui lòng setting email';
-            exit;
-        }
-
-        foreach ($rows as $row) {
-            echo '======Information=========<br/>';
-            echo $row->link . '<br/>';
-            flush();
-            ob_flush();
+        $arrExecs = array();
+        foreach ($settings as $setting) {
+            $arrExecs[$setting->user_id][] = array(
+                'id' => $setting->id,
+                'brand_car' => $setting->brand_car,
+                'keyword' => $setting->keyword,
+                'product_year' => $setting->product_year,
+                'city' => $setting->city,
+                'hop_so' => $setting->hop_so,
+                'color' => $setting->color,
+                'updated_at' => $setting->updated_at,
+            );
         }
 
-        $emailTitle = 'Xe mới nhất...';
-        $toEmail = $config->value;
-        try {
-            Mail::send('cron.email', [
-                'setting' => $setting,
-                'data' => $rows], function($message) use ($toEmail, $emailTitle) {
-                $message->to($toEmail, '')->subject($emailTitle);
+        foreach ($arrExecs as $key => $values)
+        {
+            foreach ($values as $index => $value) {
+                $content = new \App\Models\Contents();
+                $rows = $content->getBookAuto($value);
+                if ($rows->count() === 0) {
+                    continue;
+                }
+                $arrExecs[$key][$index]['links'] = $rows;
+            }
+        }
+
+        foreach ($arrExecs as $user_id => $rows) {
+            $config = \App\Models\Config::where('user_id', $user_id)->first();
+            if ($config === null) {
+                continue;
+            }
+
+            $strHtml = '';
+            foreach ($rows as $keyIndex => $row) {
+                $links = isset($row['links']) ? $row['links'] : null;
+                if (empty($links) || $links->count() === 0) {
+                    unset($arrExecs[$user_id][$keyIndex]);
+                    continue;
+                }
+
+                echo '======Information=========<br/>';
+                echo 'Total send link: ' . $links->count(). '<br/>';
+                flush();
+                ob_flush();
+
+                $strHtml .= \View::make('cron.email', ['setting' => $row])->render();
+
+                $rowObj = \App\Models\Settings::find($row['id']);
+                if ($rowObj) {
+                    $rowObj->updated_at = date('Y-m-d H:i:s');
+                    $rowObj->save();
+                }
+            }
+            if (empty($strHtml)) {
+                continue;
+            }
+
+            $emailTitle = 'Xe mới nhất...';
+            $toEmail = $config->email;
+            Mail::send([], [], function($message) use ($toEmail, $emailTitle, $strHtml) {
+                $message->to($toEmail, '')->subject($emailTitle)
+                    ->setBody($strHtml, 'text/html');
             });
-        } catch (\Exception $e) {
-            echo 'Không thể send email. Vui lòng liên hệ admin';
         }
+        echo 'Item empty <br/>';
+        echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
+        echo '=========================================================================<br/>';
+        flush();
+        ob_flush();
 
         echo "DONE";
         exit;

@@ -57,6 +57,7 @@
                                 </div>
                             </div>
                             <div class="form-groupr">
+                                <label class="col-sm-5 control-label"></label>
                                 <p class="text-error">{{ $message or null }}</p>
                             </div>
                         </div>

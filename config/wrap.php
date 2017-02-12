@@ -6,6 +6,10 @@ define('ROLE_LICENSEE', 1);
 define('ROLE_CONTROLLER', 2);
 
 return [
+    'roles' => array(
+        'admin' => 1,
+        'sale' => 2,
+    ),
     'url_site' => array(
         'bonbanh' => 'http://www.bonbanh.com/',
         'muaban'  => 'https://muaban.net/',

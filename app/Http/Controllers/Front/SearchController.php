@@ -127,8 +127,8 @@ class SearchController extends Controller
     protected function getSetting($data)
     {
         $setting = \App\Models\Settings::first();
-        $data['setting'] = $setting;
-        $data['config'] = \App\Models\Config::first();
+//        $data['setting'] = $setting;
+//        $data['config'] = \App\Models\Config::first();
         $data['brands'] = \config('wrap.brands');
         $data['hop_so_list'] = \config('wrap.hop_so_list');
         $data['product_year_list'] = $this->getYear();

@@ -85,6 +85,8 @@ class LoginController extends Controller
                         } else {
                             return redirect(route('home_index'));
                         }
+                    } else {
+                        $data['message'] = 'Email hoặc mật khẩu không đúng';
                     }
                 }
             }
