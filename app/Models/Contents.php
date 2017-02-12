@@ -10,68 +10,72 @@ class Contents extends Model
     //Map to table in database
     protected $table='contents';
 
-    public function getContent($keyword)
+    public function getContent($keyword, $timeVal)
     {
-        $query = DB::table($this->table);
-        if (!empty($keyword)) {
-            $parts = $this->seoUrl($keyword);
-            $parts = explode('-', $parts);
-//            var_dump($parts);exit;
-            if (count($parts)) {
-                $query->where(function($query) use ($parts) {
-                    foreach ($parts as $part) {
-                        $query->where('brand_car', 'LIKE', "%{$part}%");
-                    }
-                });
-                $query->orWhere(function($query) use ($parts) {
-                    foreach ($parts as $part) {
-                        $query->where('code_car_site', 'LIKE', "%{$part}%");
-                    }
-                });
-                $query->orWhere(function($query) use ($parts) {
-                    foreach ($parts as $part) {
-                        $query->where('color', 'LIKE', "%{$part}%");
-                    }
-                });
-                $query->orWhere(function($query) use ($parts) {
-                    foreach ($parts as $part) {
-                        $query->where('km_run', 'LIKE', "%{$part}%");
-                    }
-                });
-                $query->orWhere(function($query) use ($parts) {
-                    foreach ($parts as $part) {
-                        $query->where('product_year', 'LIKE', "%{$part}%");
-                    }
-                });
-                $query->orWhere(function($query) use ($parts) {
-                    foreach ($parts as $part) {
-                        $query->where('price', 'LIKE', "%{$part}%");
-                    }
-                });
-                $query->orWhere(function($query) use ($parts) {
-                    foreach ($parts as $part) {
-                        $query->where('contact', 'LIKE', "%{$part}%");
-                    }
-                });
-                $query->orWhere(function($query) use ($parts) {
-                    foreach ($parts as $part) {
-                        $query->where('phone', 'LIKE', "%{$part}%");
-                    }
-                });
-                $query->orWhere(function($query) use ($parts) {
-                    foreach ($parts as $part) {
-                        $query->where('city', 'LIKE', "%{$part}%");
-                    }
-                });
-                $query->orWhere(function($query) use ($parts) {
-                    foreach ($parts as $part) {
-                        $query->where('short_content', 'LIKE', "%{$part}%");
-                    }
-                });
+        $query = DB::table($this->table)
+            ->where(function($query) use ($keyword) {
+            if (!empty($keyword)) {
+                $parts = $this->seoUrl($keyword);
+                $parts = explode('-', $parts);
+                if (count($parts)) {
+                    $query->where(function($query) use ($parts) {
+                        foreach ($parts as $part) {
+                            $query->where('brand_car', 'LIKE', "%{$part}%");
+                        }
+                    });
+                    $query->orWhere(function($query) use ($parts) {
+                        foreach ($parts as $part) {
+                            $query->where('code_car_site', 'LIKE', "%{$part}%");
+                        }
+                    });
+                    $query->orWhere(function($query) use ($parts) {
+                        foreach ($parts as $part) {
+                            $query->where('color', 'LIKE', "%{$part}%");
+                        }
+                    });
+                    $query->orWhere(function($query) use ($parts) {
+                        foreach ($parts as $part) {
+                            $query->where('km_run', 'LIKE', "%{$part}%");
+                        }
+                    });
+                    $query->orWhere(function($query) use ($parts) {
+                        foreach ($parts as $part) {
+                            $query->where('product_year', 'LIKE', "%{$part}%");
+                        }
+                    });
+                    $query->orWhere(function($query) use ($parts) {
+                        foreach ($parts as $part) {
+                            $query->where('price', 'LIKE', "%{$part}%");
+                        }
+                    });
+                    $query->orWhere(function($query) use ($parts) {
+                        foreach ($parts as $part) {
+                            $query->where('contact', 'LIKE', "%{$part}%");
+                        }
+                    });
+                    $query->orWhere(function($query) use ($parts) {
+                        foreach ($parts as $part) {
+                            $query->where('phone', 'LIKE', "%{$part}%");
+                        }
+                    });
+                    $query->orWhere(function($query) use ($parts) {
+                        foreach ($parts as $part) {
+                            $query->where('city', 'LIKE', "%{$part}%");
+                        }
+                    });
+                    $query->orWhere(function($query) use ($parts) {
+                        foreach ($parts as $part) {
+                            $query->where('short_content', 'LIKE', "%{$part}%");
+                        }
+                    });
+                }
+            } else {
+                $keyword = 'null';
+                $query->where('brand_car', '=', "{$keyword}");
             }
-        } else {
-            $keyword = 'null';
-            $query->where('brand_car', '=', "{$keyword}");
+        });
+        if (!empty($timeVal)) {
+            $query->where('created_at', '>=', date('Y-m-d H:i:s', strtotime($timeVal)));
         }
 
         return $query->paginate(20);

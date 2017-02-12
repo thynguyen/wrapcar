@@ -47,6 +47,17 @@
                                     <input type="textbox" class="form-control" name="keyword" value="{{ isset($keyword) ? $keyword : '' }}" placeholder="Keyword" />
                                 </div>
                             </div>
+                            <div class="form-group">
+                                <div class="col-sm-5" style="margin-top: 5px;">
+                                    <select name="time" class="form-control">
+                                        @if(isset($timeList) && count($timeList))
+                                        @foreach($timeList as $val => $item)
+                                        <option value="{{ $val }}" @if ($val == $time) selected="selected" @endif>{{ $item }}</option>
+                                        @endforeach
+                                        @endif
+                                  </select>
+                                </div>
+                            </div>
                         </div>
                         <div class="box-footer">
                             <input class="btn btn-default" type="submit" value="Search" name="submit" />

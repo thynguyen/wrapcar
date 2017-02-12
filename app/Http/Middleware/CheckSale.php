@@ -19,8 +19,8 @@ class CheckSale
         if ($user) {
             $role = config('wrap.roles');
 
-            if ($user->role_id != $role['sale']) {
-              return redirect()->route('home_index');
+            if ($user->role_id != $role['admin'] && $user->role_id != $role['sale']) {
+                return redirect()->route('home_index');
             }
             if ($user->status != 1) {
                 Auth::logout();

@@ -73,55 +73,22 @@ class SearchController extends Controller
 //        $offset = ($page * $perPage) - $perPage;
 
         $keyword = $request->get('keyword');
+        $time = $request->get('time');
+        $timeVals = config('wrap.time_list_value');
+        $timeVal = isset($timeVals[$time]) ? $timeVals[$time] : null;
+
         $content = new \App\Models\Contents();
-        $pagination = $content->getContent($keyword);
+        $pagination = $content->getContent($keyword, $timeVal);
 
         $data = array(
+            'time' => $request->get('time'),
+            'timeList' => config('wrap.time_list'),
             'keyword' => $keyword,
             'pagination' => $pagination,
         );
         $data = array_merge($data, $this->getSetting($data));
 
         return view('search.index', $data);
-    }
-
-    public function setting(Request $request)
-    {
-        if (!Auth::check()) {
-            return redirect(route('home_search'));
-        }
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'brand' => 'required|max:255',
-            'product' => 'required|max:255',
-            'product_year' => 'required|numeric',
-            'status' => 'required|in:0,1',
-        ]);
-
-        if ($validator->fails()) {
-            return redirect('search')
-                        ->withErrors($validator)
-                        ->withInput();
-        }
-
-        $setting = \App\Models\Settings::first();
-        if ($setting === NULL) {
-            $setting = new \App\Models\Settings();
-        }
-        $setting->user_id = Auth::id();
-        $setting->email = $request->get('email');
-        $setting->brand_car = $request->get('brand');
-        $setting->keyword = $request->get('product');
-        $setting->product_year = $request->get('product_year');
-        $setting->city = $request->get('city');
-        $setting->hop_so = $request->get('hop_so');
-        $setting->color = $request->get('color');
-        $setting->status = $request->get('status');
-        $setting->created_at = date('Y-m-d H:i:s');
-        $setting->save();
-
-        $request->session()->flash('success', 'Cập nhật data thành công');
-        return redirect('search');
     }
 
     protected function getSetting($data)

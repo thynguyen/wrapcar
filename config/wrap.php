@@ -183,4 +183,19 @@ return [
         'Vĩnh Phúc' => 'Vĩnh Phúc',
         'Yên Bái' => 'Yên Bái',
     ),
+    'time_list' => array(
+        '' => 'Mọi lúc',
+        'hour' => 'Giờ qua',
+        '24_hour' => '24 giờ qua',
+        'week' => 'Tuần qua',
+        'month' => 'Tháng qua',
+        'year' => 'Năm qua',
+    ),
+    'time_list_value' => array(
+        'hour' => '-1 hour',
+        '24_hour' => '-24 hours',
+        'week' => '-1 week',
+        'month' => '-1 month',
+        'year' => '-1 year',
+    ),
 ];
