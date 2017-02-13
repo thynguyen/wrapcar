@@ -7,67 +7,83 @@
 
         <title>Search Car</title>
 
-        <!-- Fonts -->
-        <link href="https://fonts.googleapis.com/css?family=Raleway:100,600" rel="stylesheet" type="text/css">
-        
+        <!-- Tell the browser to be responsive to screen width -->
+        <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
         <!-- Bootstrap 3.3.5 -->
-        <link rel="stylesheet" href="{{asset('bootstrap/css/bootstrap.min.css')}}">
+        <link rel="stylesheet" href="{{asset('admin_lte/bootstrap/css/bootstrap.min.css')}}">
+        <!-- Theme style -->
+        <link rel="stylesheet" href="{{asset('admin_lte/dist/css/AdminLTE.min.css')}}">
+        <!-- AdminLTE Skins. Choose a skin from the css/skins
+             folder instead of downloading all of them to reduce the load. -->
+        <link rel="stylesheet" href="{{ asset('/admin_lte/plugins/jQueryUI/jquery-ui.min.css') }}">
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
         <script src="{{asset('js/jQuery-2.1.4.min.js')}}"></script>
 
         <!-- Styles -->
         <style>
             .text-error { color: red; }
-            .box {
-                border-radius: 3px;
-                margin-bottom: 20px;
-                position: relative;
-                width: 100%;
-            }
         </style>
     </head>
     <body>
-        <div class="container">
-            <div class="col-md-6" style="margin-bottom: 20px;">
-                @if (Auth::check())
-                    <a href="{{ route('logout') }}" class="btn btn-info">Logout</a>
-                    Xin chào <strong>{{ Auth::user()->name }}</strong>
-                    <a href="{{ route('setting_index') }}" class="btn btn-info pull-right">List book xe</a>
-                @else
-                    <a href="{{ route('auth_login') }}" class="btn btn-info">Login</a>
-                @endif
-            </div>
-            <div style="clear: both;"></div>
-
-            <div class="col-md-6">
-                <div class="box box-info" style="margin-top: 5px;">
-                    <form name="f" id="f" action="{{ route('search_index') }}" method="GET">
-                        <div class="box-body">
-                            <div class="form-group">
-                                <div class="col-sm-10">
-                                    <input type="textbox" class="form-control" name="keyword" value="{{ isset($keyword) ? $keyword : '' }}" placeholder="Keyword" />
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <div class="col-sm-5" style="margin-top: 5px;">
-                                    <select name="time" class="form-control">
-                                        @if(isset($timeList) && count($timeList))
-                                        @foreach($timeList as $val => $item)
-                                        <option value="{{ $val }}" @if ($val == $time) selected="selected" @endif>{{ $item }}</option>
-                                        @endforeach
-                                        @endif
-                                  </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="box-footer">
-                            <input class="btn btn-default" type="submit" value="Search" name="submit" />
-                        </div>
-                    </form>
+        <div class="center-block">
+            <div style="margin: 0 auto; max-width: 800px">
+                <div class="col-md-10" style="margin-bottom: 20px;">
+                    @if (Auth::check())
+                        <a href="{{ route('logout') }}" class="btn btn-info">Logout</a>
+                        Xin chào <strong>{{ Auth::user()->name }}</strong>
+                        <a href="{{ route('setting_index') }}" class="btn btn-info pull-right">List book xe</a>
+                    @else
+                        <a href="{{ route('auth_login') }}" class="btn btn-info">Login</a>
+                    @endif
                 </div>
-            </div>
-            <div style="clear: both;"></div>
+                <div style="clear: both;"></div>
 
-            <div class="col-xs-12">
+                <div class="col-md-10">
+                    <div class="box box-info" style="margin-top: 5px;">
+                        <form name="f" id="f" action="{{ route('search_index') }}" method="GET">
+                            <div class="box-body">
+                                <div class="form-group">
+                                    <div class="col-sm-10 input-group-sm">
+                                        <input type="textbox" class="form-control" name="keyword" value="{{ isset($keyword) ? $keyword : '' }}" placeholder="Keyword" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-5 input-group-sm" style="margin-top: 5px;">
+                                        <select name="time" class="form-control">
+                                            @if(isset($timeList) && count($timeList))
+                                            @foreach($timeList as $val => $item)
+                                            <option value="{{ $val }}" @if ($val == $time) selected="selected" @endif>{{ $item }}</option>
+                                            @endforeach
+                                            @endif
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-5 input-group-sm" style="margin-top: 5px;">
+                                        <select name="city" class="form-control">
+                                            @if(isset($citiList) && count($citiList))
+                                            @foreach($citiList as $valC => $itemC)
+                                            <option value="{{ $valC }}" @if ($valC == $city) selected="selected" @endif>{{ $itemC }}</option>
+                                            @endforeach
+                                            @endif
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="box-footer">
+                                <input class="btn btn-default" type="submit" value="Search" name="submit" />
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div style="clear: both;"></div>
+
+                <div class="col-md-10">
                 @if (isset($pagination) && count($pagination))
                     @foreach ($pagination as $item)
                     <div class="box-body" style="border-bottom: 1px dotted gray;">
@@ -90,6 +106,7 @@
                         {!! $pagination->appends(['keyword' => $keyword])->render() !!}
                     </div>
                 @endif
+                </div>
             </div>
         </div>
         <script>

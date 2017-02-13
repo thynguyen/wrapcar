@@ -10,7 +10,7 @@ class Contents extends Model
     //Map to table in database
     protected $table='contents';
 
-    public function getContent($keyword, $timeVal)
+    public function getContent($keyword, $timeVal, $city)
     {
         $query = DB::table($this->table)
             ->where(function($query) use ($keyword) {
@@ -76,6 +76,9 @@ class Contents extends Model
         });
         if (!empty($timeVal)) {
             $query->where('created_at', '>=', date('Y-m-d H:i:s', strtotime($timeVal)));
+        }
+        if (!empty($city)) {
+            $query->where('city', 'LIKE', "%{$city}%");
         }
 
         return $query->paginate(20);
