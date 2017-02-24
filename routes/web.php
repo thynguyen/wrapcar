@@ -14,6 +14,8 @@ Route::match(['get', 'post'], '/login', 'Auth\LoginController@login')->name('aut
 Route::get('logout', 'Auth\LoginController@logout')->name('logout');
 Route::get('front/cron', 'Front\CronController@index')->name('front_cron_index');
 Route::get('front/book_auto', 'Front\CronController@bookAuto')->name('front_cron_book_auto');
+Route::get('front/test_email', 'Front\CronController@testEmail')->name('front_cron_test_email');
+Route::get('front/test_bookauto', 'Front\CronController@testBookAuto')->name('front_cron_test_book');
 
 Route::group(['prefix' => 'sale', 'middleware' => 'auth.sale'], function () {
     Route::get('/', 'Front\SearchController@index')->name('home_index');

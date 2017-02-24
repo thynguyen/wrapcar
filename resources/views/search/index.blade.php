@@ -32,6 +32,7 @@
         </style>
     </head>
     <body>
+        @include('analyticstracking')
         <div class="center-block">
             <div style="margin: 0 auto; max-width: 800px">
                 <div class="col-md-10" style="margin-bottom: 20px;">
@@ -75,7 +76,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="box-footer">
+                            <div class="box-footer" style="text-align: center;">
                                 <input class="btn btn-default" type="submit" value="Search" name="submit" />
                             </div>
                         </form>
@@ -84,11 +85,14 @@
                 <div style="clear: both;"></div>
 
                 <div class="col-md-10">
-                @if (isset($pagination) && count($pagination))
+                @if (isset($pagination) && $pagination->total())
                     @foreach ($pagination as $item)
                     <div class="box-body" style="border-bottom: 1px dotted gray;">
                         <h3>
                             <a href="{{ $item->link }}">{{ $item->brand_car }}</a>
+                            @if ($item->owner == 1)
+                            <img src="{{ asset('image/chinhchu.png') }}" />
+                            @endif
                         </h3>
                         <h6>
                             <a href="{{ $item->link }}">{{ $item->link }}</a>
@@ -97,13 +101,14 @@
                         <div>Liên hệ: {{ $item->contact }}</div>
                         <div>Thành phố: {{ $item->city }}</div>
                         <div>
-                            {!! substr($item->short_content, 0, 1000) !!}...
+                            {!! mb_substr(strip_tags($item->short_content), 0, 1000, 'UTF-8') !!}...
                         </div>
                     </div>
+                    <div style="clear:both;"></div>
                     @endforeach
 
                     <div>
-                        {!! $pagination->appends(['keyword' => $keyword])->render() !!}
+                        {!! $pagination->render() !!}
                     </div>
                 @endif
                 </div>

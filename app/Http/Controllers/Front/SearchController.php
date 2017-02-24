@@ -66,11 +66,9 @@ class SearchController extends Controller
 
     public function index(Request $request)
     {
-//        $pagination = null;
-
-//        $page = $request->get('page', 1); // Get the current page or default to 1, this is what you miss!
-//        $perPage = 10;
-//        $offset = ($page * $perPage) - $perPage;
+        $page = $request->get('page', 1); // Get the current page or default to 1, this is what you miss!
+        $perPage = 20;
+        $offset = ($page * $perPage) - $perPage;
 
         $keyword = $request->get('keyword');
         $time = $request->get('time');
@@ -79,7 +77,31 @@ class SearchController extends Controller
         $timeVal = isset($timeVals[$time]) ? $timeVals[$time] : null;
 
         $content = new \App\Models\Contents();
-        $pagination = $content->getContent($keyword, $timeVal, $city);
+
+        $arrExept = array();
+        if (!empty($keyword)) {
+            $execpts = $content->get_content_except($keyword, $timeVal, $city);
+            if ($execpts->count()) {
+                foreach ($execpts as $except) {
+                    $arrExept[] = $except->id_string;
+                }
+            }
+            $arrExept = explode(',', implode(',', $arrExept));
+        }
+
+        $result = $content->getContent($keyword, $timeVal, $city, $arrExept, $offset, $perPage);
+        $total = $content->getTotal();
+
+        $pagination = new LengthAwarePaginator(
+                $result, 
+                $total, 
+                $perPage,
+                $page,
+                [
+                    'path' => Paginator::resolveCurrentPath(),
+                    'query' => $request->query(),
+                ]
+            );
 
         $data = array(
             'time' => $request->get('time'),
@@ -89,23 +111,8 @@ class SearchController extends Controller
             'keyword' => $keyword,
             'pagination' => $pagination,
         );
-        $data = array_merge($data, $this->getSetting($data));
 
         return view('search.index', $data);
-    }
-
-    protected function getSetting($data)
-    {
-//        $setting = \App\Models\Settings::first();
-//        $data['setting'] = $setting;
-//        $data['config'] = \App\Models\Config::first();
-//        $data['brands'] = \config('wrap.brands');
-//        $data['hop_so_list'] = \config('wrap.hop_so_list');
-//        $data['product_year_list'] = $this->getYear();
-//        $data['color_list'] = \config('wrap.color_list');
-//        $data['city_list'] = \config('wrap.city_list');
-
-        return $data;
     }
 
     protected function getYear()

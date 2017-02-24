@@ -9,13 +9,14 @@ class CronController extends BaseController
 {
     public function index(Request $request)
     {
+        $this->getCarmundi();
+
         $this->getBonBanh();
 
         $this->getMuaBan();
 
         $this->getOtoVietName();
 
-        $this->getCarmundi();
 
         $this->getBanXeHoi();
 
@@ -49,7 +50,6 @@ class CronController extends BaseController
 
     public function bookAuto(Request $request)
     {
-        echo 'Item empty <br/>';
         echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
         echo '=========================================================================<br/>';
         flush();
@@ -70,7 +70,7 @@ class CronController extends BaseController
                 'city' => $setting->city,
                 'hop_so' => $setting->hop_so,
                 'color' => $setting->color,
-                'updated_at' => $setting->updated_at,
+                'updated_at' => date('Y-m-d H:i:s', strtotime($setting->updated_at)),
             );
         }
 
@@ -124,13 +124,96 @@ class CronController extends BaseController
                     ->setBody($strHtml, 'text/html');
             });
         }
-        echo 'Item empty <br/>';
         echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
         echo '=========================================================================<br/>';
         flush();
         ob_flush();
 
         echo "DONE";
+        exit;
+    }
+
+    public function testBookAuto(Request $request)
+    {
+        echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
+        echo '=========================================================================<br/>';
+        flush();
+        ob_flush();
+
+        $arrExecs = array(
+            3 => array(
+                array(
+                    'brand_car' => 'Kia',
+                    'keyword' => 'morning',
+                    'product_year' => '2016',
+                    'city' => 'Hà Nội',
+                    'hop_so' => 'AT',
+                    'color' => 'Xám',
+                    'updated_at' => '2017-02-17 10:10:10',
+                )
+            )
+        );
+
+        foreach ($arrExecs as $key => $values)
+        {
+            foreach ($values as $index => $value) {
+                $content = new \App\Models\Contents();
+                $rows = $content->getBookAuto($value);
+                if ($rows->count() === 0) {
+                    continue;
+                }
+                $arrExecs[$key][$index]['links'] = $rows;
+            }
+        }
+
+        foreach ($arrExecs as $user_id => $rows) {
+            $config = \App\Models\Config::where('user_id', $user_id)->first();
+            if ($config === null) {
+                continue;
+            }
+
+            $strHtml = '';
+            foreach ($rows as $keyIndex => $row) {
+                $links = isset($row['links']) ? $row['links'] : null;
+                if (empty($links) || $links->count() === 0) {
+                    unset($arrExecs[$user_id][$keyIndex]);
+                    continue;
+                }
+
+                echo '======Information=========<br/>';
+                echo 'Total send link: ' . $links->count(). '<br/>';
+                flush();
+                ob_flush();
+
+                $strHtml .= \View::make('cron.email', ['setting' => $row])->render();
+            }
+            if (empty($strHtml)) {
+                continue;
+            }
+            echo $strHtml . '<br/>';
+            echo '=======================================================<br/>';
+            flush();
+            ob_flush();
+        }
+        echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
+        echo '=========================================================================<br/>';
+        flush();
+        ob_flush();
+
+        echo "DONE";
+        exit;
+    }
+
+    public function testEmail()
+    {
+        $toEmail = 'thynguyen222@gmail.com';
+        $emailTitle = 'Test email';
+        $strHtml = 'Bla bla bla';
+        Mail::send([], [], function($message) use ($toEmail, $emailTitle, $strHtml) {
+            $message->to($toEmail, '')->subject($emailTitle)
+                ->setBody($strHtml, 'text/html');
+        });
+        echo 'DONE';
         exit;
     }
 

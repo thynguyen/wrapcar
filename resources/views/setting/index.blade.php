@@ -32,6 +32,7 @@
         </style>
     </head>
     <body>
+        @include('analyticstracking')
         <div class="center-block">
             <div style="margin: 0 auto; max-width: 800px;">
                 <div class="col-md-10" style="margin-bottom: 20px;">

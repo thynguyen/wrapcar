@@ -111,7 +111,6 @@ class BaseController extends Controller
         }
 
         $url = \config('wrap.url_site.carmudi') . '/all/?sort=suggested&page=1';
-
         $html = HtmlDomParser::file_get_html($url);
         if (!is_object($html)) {
             unset($html);
@@ -460,6 +459,7 @@ class BaseController extends Controller
 
     protected function getContentBonBanh($page, $totalPage, $dataOld)
     {
+        $max_loop = false;
         echo 'Page: ' . $page . '<br/>';
         flush();
         ob_flush();
@@ -497,9 +497,12 @@ class BaseController extends Controller
                 if ($this->type !== 'all') {
                     $count = Contents::where('type', 'bon_banh')->where('link', $domain . $link)->count();
                     if (!empty($count)) {
-                        $page = -1;
+////                        $page = -1;
                         unset($count);
-                        break;
+                        $items[$indexL]->clear();
+                        $max_loop = true;
+                        continue;
+////                        break;
                     }
                 }
 
@@ -544,6 +547,11 @@ class BaseController extends Controller
             }
         }
 
+        if ($max_loop && $page >= 2) {
+            unset($max_loop);
+            return;
+        }
+
         if ($page > 0 || $page < $totalPage) {
             if ($dataOld === NULL) {
                 $page--;
@@ -556,6 +564,7 @@ class BaseController extends Controller
 
     protected function getContentMuaBan($page, $totalPage, $dataOld)
     {
+        $max_loop = false;
         echo 'Page: ' . $page . '<br/>';
         flush();
         ob_flush();
@@ -591,9 +600,12 @@ class BaseController extends Controller
                 if ($this->type !== 'all') {
                     $count = Contents::where('type', 'mua_ban')->where('link', $link)->count();
                     if (!empty($count)) {
-                        $page = -1;
+//                        $page = -1;
                         unset($count);
-                        break;
+                        $max_loop = true;
+                        $items[$indexL]->clear();
+                        continue;
+//                        break;
                     }
                 }
 
@@ -637,6 +649,11 @@ class BaseController extends Controller
 
                 unset($data);
             }
+        }
+
+        if ($max_loop && $page >= 2) {
+            unset($max_loop);
+            return;
         }
 
         if ($page > 0 || $page < $totalPage) {
@@ -687,9 +704,11 @@ class BaseController extends Controller
                 if ($this->type !== 'all') {
                     $count = Contents::where('type', 'otovietnam')->where('link', $domain . $link)->count();
                     if (!empty($count)) {
-                        $page = -1;
+//                        $page = -1;
                         unset($count);
-                        break;
+                        $items[$indexL]->clear();
+                        continue;
+//                        break;
                     }
                 }
 
@@ -745,6 +764,7 @@ class BaseController extends Controller
 
     protected function getContentCarmudi($page, $totalPage, $dataOld)
     {
+        $max_loop = false;
         echo 'Page: ' . $page . '<br/>';
         flush();
         ob_flush();
@@ -783,9 +803,12 @@ class BaseController extends Controller
                 if ($this->type !== 'all') {
                     $count = Contents::where('type', 'carmudi')->where('link', $domain . $link)->count();
                     if (!empty($count)) {
-                        $page = -1;
+//                        $page = -1;
+                        $max_loop = true;
                         unset($count);
-                        break;
+                        $items[$indexL]->clear();
+                        continue;
+//                        break;
                     }
                 }
 
@@ -834,6 +857,11 @@ class BaseController extends Controller
                 unset($data);
             }
         }
+        
+        if ($max_loop && $page >= 2) {
+            unset($max_loop);
+            return;
+        }
 
         if ($page > 0 || $page < $totalPage) {
             if ($dataOld === NULL) {
@@ -847,6 +875,7 @@ class BaseController extends Controller
 
     protected function getContentBanXeHoi($page, $totalPage, $dataOld)
     {
+        $max_loop = false;
         echo 'Page: ' . $page . '<br/>';
         flush();
         ob_flush();
@@ -884,9 +913,12 @@ class BaseController extends Controller
                 if ($this->type !== 'all') {
                     $count = Contents::where('type', 'ban_xe_hoi')->where('link', $domain . $link)->count();
                     if (!empty($count)) {
-                        $page = -1;
+//                        $page = -1;
+                        $max_loop = true;
                         unset($count);
-                        break;
+                        $items[$indexL]->clear();
+                        continue;
+//                        break;
                     }
                 }
 
@@ -939,6 +971,11 @@ class BaseController extends Controller
             }
         }
 
+        if ($max_loop && $page >= 2) {
+            unset($max_loop);
+            return;
+        }
+
         if ($page > 0 || $page < $totalPage) {
             if ($dataOld === NULL) {
                 $page--;
@@ -951,6 +988,7 @@ class BaseController extends Controller
 
     protected function getContentChoXe($page, $totalPage, $dataOld)
     {
+        $max_loop = false;
         if ($page <= 0 || empty($page) || $page > $totalPage) {
             return;
         }
@@ -988,9 +1026,12 @@ class BaseController extends Controller
                 if ($this->type !== 'all') {
                     $count = Contents::where('type', 'cho_xe')->where('link', $domain . $link)->count();
                     if (!empty($count)) {
-                        $page = -1;
+//                        $page = -1;
+                        $max_loop = true;
                         unset($count);
-                        break;
+                        $items[$indexL]->clear();
+                        continue;
+//                        break;
                     }
                 }
 
@@ -1041,6 +1082,11 @@ class BaseController extends Controller
             }
         }
 
+        if ($max_loop && $page >= 2) {
+            unset($max_loop);
+            return;
+        }
+
         if ($page > 0 || $page < $totalPage) {
             if ($dataOld === NULL) {
                 $page--;
@@ -1053,6 +1099,7 @@ class BaseController extends Controller
 
     protected function getContentXe360($page, $totalPage, $dataOld)
     {
+        $max_loop = false;
         if ($page <= 0 || empty($page) || $page > $totalPage) {
             return;
         }
@@ -1090,9 +1137,12 @@ class BaseController extends Controller
                 if ($this->type !== 'all') {
                     $count = Contents::where('type', 'xe_360')->where('link', $domain . $link)->count();
                     if (!empty($count)) {
-                        $page = -1;
+//                        $page = -1;
                         unset($count);
-                        break;
+                        $max_loop = true;
+//                        break;
+                        $items[$indexL]->clear();
+                        continue;
                     }
                 }
 
@@ -1158,6 +1208,11 @@ class BaseController extends Controller
             }
         }
 
+        if ($max_loop && $page >= 2) {
+            unset($max_loop);
+            return;
+        }
+
         if ($page > 0 || $page < $totalPage) {
             if ($dataOld === NULL) {
                 $page--;
@@ -1170,6 +1225,7 @@ class BaseController extends Controller
 
     protected function getContentXe5Giay($page, $totalPage, $dataOld)
     {
+        $max_loop = false;
         if ($page <= 0 || empty($page) || $page > $totalPage) {
             return;
         }
@@ -1206,9 +1262,12 @@ class BaseController extends Controller
                 if ($this->type !== 'all') {
                     $count = Contents::where('type', 'xe_5giay')->where('link', $domain . $link)->count();
                     if (!empty($count)) {
-                        $page = -1;
+//                        $page = -1;
                         unset($count);
-                        break;
+//                        break;
+                        $max_loop = true;
+                        $items[$indexL]->clear();
+                        continue;
                     }
                 }
 
@@ -1252,6 +1311,11 @@ class BaseController extends Controller
             }
         }
 
+        if ($max_loop && $page >= 2) {
+            unset($max_loop);
+            return;
+        }
+
         if ($page > 0 || $page < $totalPage) {
             if ($dataOld === NULL) {
                 $page--;
@@ -1264,6 +1328,7 @@ class BaseController extends Controller
 
     protected function getContentSanOtoVn($page, $totalPage, $dataOld)
     {
+        $max_loop = false;
         if ($page <= 0 || empty($page) || $page > $totalPage) {
             return;
         }
@@ -1301,9 +1366,12 @@ class BaseController extends Controller
                 if ($this->type !== 'all') {
                     $count = Contents::where('type', 'san_oto')->where('link', $domain . $link)->count();
                     if (!empty($count)) {
-                        $page = -1;
+//                        $page = -1;
                         unset($count);
-                        break;
+                        $max_loop = true;
+//                        break;
+                        $items[$indexL]->clear();
+                        continue;
                     }
                 }
 
@@ -1361,6 +1429,11 @@ class BaseController extends Controller
             }
         }
 
+        if ($max_loop && $page >= 2) {
+            unset($max_loop);
+            return;
+        }
+
         if ($page > 0 || $page < $totalPage) {
             if ($dataOld === NULL) {
                 $page--;
@@ -1373,6 +1446,7 @@ class BaseController extends Controller
 
     protected function getContentMuaBanOto($page, $totalPage, $dataOld)
     {
+//        $max_loop = false;
         if ($page <= 0 || empty($page) || $page > $totalPage) {
             return;
         }
@@ -1427,6 +1501,9 @@ class BaseController extends Controller
                         if (!empty($count)) {
                             $page = -1;
                             unset($count);
+//                            $max_loop = true;
+//                            $items[$indexL]->clear();
+//                            continue;
                             break;
                         }
                     }
@@ -1472,6 +1549,11 @@ class BaseController extends Controller
             }
         }
 
+//        if ($max_loop && $page >= 2) {
+//            unset($max_loop);
+//            return;
+//        }
+
         if ($page > 0 || $page < $totalPage) {
             if ($dataOld === NULL) {
                 $page--;
@@ -1484,6 +1566,7 @@ class BaseController extends Controller
 
     protected function getContentMuaBanNhanh($page, $totalPage, $dataOld)
     {
+        $max_loop = false;
         if ($page <= 0 || empty($page) || $page > $totalPage) {
             return;
         }
@@ -1519,9 +1602,12 @@ class BaseController extends Controller
                 if ($this->type !== 'all') {
                     $count = Contents::where('type', 'muaban_nhanh')->where('link', $link)->count();
                     if (!empty($count)) {
-                        $page = -1;
+//                        $page = -1;
                         unset($count);
-                        break;
+                        $max_loop = true;
+                        $items[$indexL]->clear();
+                        continue;
+//                        break;
                     }
                 }
 
@@ -1564,6 +1650,11 @@ class BaseController extends Controller
             }
         }
 
+        if ($max_loop && $page >= 2) {
+            unset($max_loop);
+            return;
+        }
+
         if ($page > 0 || $page < $totalPage) {
             if ($dataOld === NULL) {
                 $page--;
@@ -1576,6 +1667,7 @@ class BaseController extends Controller
 
     protected function getContentRongBay($page, $totalPage, $dataOld)
     {
+        $max_loop = false;
         if ($page <= 0 || empty($page) || $page > $totalPage) {
             return;
         }
@@ -1611,9 +1703,12 @@ class BaseController extends Controller
                 if ($this->type !== 'all') {
                     $count = Contents::where('type', 'rong_bay')->where('link', $link)->count();
                     if (!empty($count)) {
-                        $page = -1;
+//                        $page = -1;
                         unset($count);
-                        break;
+                        $max_loop = true;
+                        $items[$indexL]->clear();
+                        continue;
+//                        break;
                     }
                 }
                 $title = @$item->find('.h3_car_title a', 0)->plaintext;
@@ -1665,6 +1760,10 @@ class BaseController extends Controller
                 unset($data);
             }
         }
+        if ($max_loop && $page >= 2) {
+            unset($max_loop);
+            return;
+        }
 
         if ($page > 0 || $page < $totalPage) {
             if ($dataOld === NULL) {
@@ -1678,6 +1777,7 @@ class BaseController extends Controller
 
     protected function getContentEnBac($page, $totalPage, $dataOld)
     {
+        $max_loop = false;
         if ($page <= 0 || empty($page) || $page > $totalPage) {
             return;
         }
@@ -1714,9 +1814,12 @@ class BaseController extends Controller
                 if ($this->type !== 'all') {
                     $count = Contents::where('type', 'en_bac')->where('link', $link)->count();
                     if (!empty($count)) {
-                        $page = -1;
+//                        $page = -1;
                         unset($count);
-                        break;
+                        $max_loop = true;
+                        $items[$indexL]->clear();
+                        continue;
+//                        break;
                     }
                 }
 
@@ -1763,6 +1866,11 @@ class BaseController extends Controller
                 unset($data);
             }
         }
+        
+        if ($max_loop && $page >= 2) {
+            unset($max_loop);
+            return;
+        }
 
         if ($page > 0 || $page < $totalPage) {
             if ($dataOld === NULL) {
@@ -1776,6 +1884,7 @@ class BaseController extends Controller
 
     protected function getContentTheGioiXeOto($page, $totalPage, $dataOld)
     {
+        $max_loop = false;
         if ($page <= 0 || empty($page) || $page > $totalPage) {
             return;
         }
@@ -1813,9 +1922,12 @@ class BaseController extends Controller
                 if ($this->type !== 'all') {
                     $count = Contents::where('type', 'thegioixe_oto')->where('link', $link)->count();
                     if (!empty($count)) {
-                        $page = -1;
+//                        $page = -1;
                         unset($count);
-                        break;
+                        $max_loop = true;
+                        $items[$indexL]->clear();
+                        continue;
+//                        break;
                     }
                 }
 
@@ -1875,6 +1987,10 @@ class BaseController extends Controller
                 unset($data);
             }
         }
+        if ($max_loop && $page >= 2) {
+            unset($max_loop);
+            return;
+        }
 
         if ($page > 0 || $page < $totalPage) {
             if ($dataOld === NULL) {
@@ -1888,6 +2004,7 @@ class BaseController extends Controller
 
     protected function getContentOtoThien($page, $totalPage, $dataOld)
     {
+        $max_loop = false;
         if ($page <= 0 || empty($page) || $page > $totalPage) {
             return;
         }
@@ -1928,9 +2045,12 @@ class BaseController extends Controller
                 if ($this->type !== 'all') {
                     $count = Contents::where('type', 'oto_thien')->where('link', $link)->count();
                     if (!empty($count)) {
-                        $page = -1;
+//                        $page = -1;
                         unset($count);
-                        break;
+                        $max_loop = true;
+                        $items[$indexL]->clear();
+                        continue;
+//                        break;
                     }
                 }
 
@@ -1984,6 +2104,11 @@ class BaseController extends Controller
             }
         }
 
+        if ($max_loop && $page >= 2) {
+            unset($max_loop);
+            return;
+        }
+
         if ($page > 0 || $page < $totalPage) {
             if ($dataOld === NULL) {
                 $page--;
@@ -1996,6 +2121,7 @@ class BaseController extends Controller
 
     protected function getContentCafeAuto($page, $totalPage, $dataOld)
     {
+        $max_loop = false;
         if ($page <= 0 || empty($page) || $page > $totalPage) {
             return;
         }
@@ -2036,9 +2162,12 @@ class BaseController extends Controller
                 if ($this->type !== 'all') {
                     $count = Contents::where('type', 'cafe_auto')->where('link', $link)->count();
                     if (!empty($count)) {
-                        $page = -1;
+//                        $page = -1;
                         unset($count);
-                        break;
+                        $max_loop = true;
+                        $items[$indexL]->clear();
+                        continue;
+//                        break;
                     }
                 }
 
@@ -2082,6 +2211,11 @@ class BaseController extends Controller
 
                 unset($data);
             }
+        }
+
+        if ($max_loop && $page >= 2) {
+            unset($max_loop);
+            return;
         }
 
         if ($page > 0 || $page < $totalPage) {
