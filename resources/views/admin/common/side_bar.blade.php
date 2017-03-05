@@ -21,6 +21,11 @@
                 </a>
             </li>
             <li class="treeview">
+                <a href="{{ route('admin_phone_black_list') }}">
+                    <i class="fa fa-dashboard"></i> <span>Phone Black List</span>
+                </a>
+            </li>
+            <li class="treeview">
                 <a href="{{ route('admin_user_manage') }}">
                     <i class="fa fa-dashboard"></i> <span>Users</span>
                 </a>

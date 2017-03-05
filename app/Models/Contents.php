@@ -19,10 +19,10 @@ class Contents extends Model
     {
         $this->total = $total;
     }
-    public function getContent($keyword, $timeVal, $city, $arrExept, $offset, $limit)
+    public function getContent($keyword, $timeVal, $city, $offset, $limit, $isOwner = 1)
     {
         $query = DB::table($this->table)
-            ->select('*', DB::raw('1 as owner'))
+            ->select('*')
             ->where(function($query) use ($keyword) {
             if (!empty($keyword)) {
                 $parts = $this->seoUrl($keyword);
@@ -90,26 +90,27 @@ class Contents extends Model
         if (!empty($city)) {
             $query->where('city', 'LIKE', "%{$city}%");
         }
+
+        $query->where('is_owner', '=', $isOwner);
+
         $total = $query->count();
         if (!$total) {
             return array();
         }
         $this->setTotal($total);
 
-        if (count($arrExept)) {
-            $query->whereNotIn('id', $arrExept);
-            $query->unionAll($this->getContentNotOwner($keyword, $timeVal, $city, $arrExept));
-        }
+        $query->unionAll($this->getContentNotOwner($keyword, $timeVal, $city));
+
         $query->skip($offset)->take($limit);
 
         return $query->get();
 //        return $query->paginate(20);
     }
-    
-    public function getContentNotOwner($keyword, $timeVal, $city, $arrExept)
+
+    public function getContentNotOwner($keyword, $timeVal, $city)
     {
         $query = DB::table($this->table)
-            ->select('*', DB::raw('0 as not_owner'))
+            ->select('*')
             ->where(function($query) use ($keyword) {
             if (!empty($keyword)) {
                 $parts = $this->seoUrl($keyword);
@@ -177,7 +178,7 @@ class Contents extends Model
         if (!empty($city)) {
             $query->where('city', 'LIKE', "%{$city}%");
         }
-        $query->whereIn('id', $arrExept);
+        $query->where('is_owner', '=', 0);
 
         return $query;
     }
@@ -283,8 +284,10 @@ class Contents extends Model
             $query->where('city', 'LIKE', "%{$city}%");
         }
         $query->where(DB::raw("TRIM(phone)"), '!=', '0000000000');
-        $query->where(DB::raw('LENGTH(trim(phone))'), '>', 7);
-        $query->where('phone', 'REGEXP', '^([0-9]+\,*)+');
+//        $query->where(DB::raw('LENGTH(trim(phone))'), '>', 7);
+//        $query->where('phone', 'REGEXP', '^([0-9]+\,*)+');
+        $query->where(DB::raw('trim(phone)'), '!=', '');
+        $query->where(DB::raw('trim(phone)'), '!=', ',');
         $query->groupBy('phone');
         $query->having('total', '>', 2);
 

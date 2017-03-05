@@ -170,6 +170,7 @@
                                 <th>Hộp số</th>
                                 <th>Màu xe</th>
                                 <th>Ngày tạo</th>
+                                <th>Ngày cập nhật</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
@@ -183,7 +184,8 @@
                                 <td>{{ $item->city }}</td>
                                 <td>{{ $item->hop_so }}</td>
                                 <td>{{ $item->color }}</td>
-                                <td>@if (!empty($item->created_at)) {{ date('d/m/Y H:i:d', strtotime($item->created_at)) }} @endif</td>
+                                <td>@if (!empty($item->created_at)) {{ date('d/m/Y H:i:s', strtotime($item->created_at)) }} @endif</td>
+                                <td>@if (!empty($item->updated_at)) {{ date('d/m/Y H:i:s', strtotime($item->updated_at)) }} @endif</td>
                                 <td>
                                     @if ($item->status == 1)
                                     <span class="label label-success">Active</span>
@@ -199,7 +201,7 @@
                             @endforeach
                             @else
                             <tr>
-                                <td colspan="10">No data</td>
+                                <td colspan="11">No data</td>
                             </tr>
                             @endif
                         </tbody>

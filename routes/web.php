@@ -16,6 +16,8 @@ Route::get('front/cron', 'Front\CronController@index')->name('front_cron_index')
 Route::get('front/book_auto', 'Front\CronController@bookAuto')->name('front_cron_book_auto');
 Route::get('front/test_email', 'Front\CronController@testEmail')->name('front_cron_test_email');
 Route::get('front/test_bookauto', 'Front\CronController@testBookAuto')->name('front_cron_test_book');
+Route::get('front/push_phone', 'Front\PhoneController@index')->name('front_cron_push_phone');
+Route::get('front/push_phone_define', 'Front\PhoneController@pushPhoneDefine')->name('front_cron_push_phone_define');
 
 Route::group(['prefix' => 'sale', 'middleware' => 'auth.sale'], function () {
     Route::get('/', 'Front\SearchController@index')->name('home_index');
@@ -30,6 +32,7 @@ Route::group(['prefix' => 'admin', 'middleware' => 'auth.admin'], function () {
 
     Route::get('dashboard', 'Admin\HomeController@index')->name('admin_dashboard');
     Route::match(['get', 'post'], 'profile/edit', 'Admin\UserProfileController@edit')->name('admin_profile_edit');
+    Route::match(['get', 'post'], 'phone/black-list','Admin\PhoneController@index')->name('admin_phone_black_list');
 
     // Manage user
     Route::get('user-manage', 'Admin\UserManageController@index')->name('admin_user_manage');

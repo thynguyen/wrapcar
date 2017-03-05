@@ -78,7 +78,18 @@ class SearchController extends Controller
 
         $content = new \App\Models\Contents();
 
-        $result = $content->getContent($keyword, $timeVal, $city, $offset, $perPage);
+        $arrExept = array();
+        if (!empty($keyword)) {
+            $execpts = $content->get_content_except($keyword, $timeVal, $city);
+            if ($execpts->count()) {
+                foreach ($execpts as $except) {
+                    $arrExept[] = $except->id_string;
+                }
+            }
+            $arrExept = explode(',', implode(',', $arrExept));
+        }
+
+        $result = $content->getContent($keyword, $timeVal, $city, $arrExept, $offset, $perPage);
         $total = $content->getTotal();
 
         $pagination = new LengthAwarePaginator(

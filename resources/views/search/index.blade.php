@@ -89,8 +89,8 @@
                     @foreach ($pagination as $item)
                     <div class="box-body" style="border-bottom: 1px dotted gray;">
                         <h3>
-                            <a href="{{ $item->link }}">{{ $item->brand_car }}</a>
-                            @if ($item->owner == 1)
+                            <a href="{{ $item->link }}" xxx="{{ $item->is_owner }}">{{ $item->brand_car }}</a>
+                            @if ($item->is_owner == 1)
                             <img src="{{ asset('image/chinhchu.png') }}" />
                             @endif
                         </h3>
