@@ -91,7 +91,7 @@ class PhoneController extends BaseController
         $this->stepRun($total, $step, $limit, $max_time);
 
         // Begin update into content
-        $query = \App\Models\Phones::where('count', '>', 2);
+        $query = \App\Models\Phones::where('count', '>', 1);
         if (!empty($max_time)) {
             $query->where('created_at', '>', $max_time);
         }
@@ -310,7 +310,7 @@ class PhoneController extends BaseController
         flush();
         ob_flush();
 
-        $query = \DB::table('phones')->select('phone_number', 'type', 'content_ids')->where('count', '>', 2);
+        $query = \DB::table('phones')->select('phone_number', 'type', 'content_ids')->where('count', '>', 1);
         $results = $query->skip($offset)->take($limit)->get();
 
         if (!$results->count()) {
