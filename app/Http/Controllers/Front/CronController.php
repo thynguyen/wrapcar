@@ -9,31 +9,30 @@ class CronController extends BaseController
 {
     public function index(Request $request)
     {
-        echo file_get_contents('https://xe.chotot.com/toan-quoc/mua-ban-o-to');exit;
-//        $this->getCarmundi();
+        $this->getCarmundi();
 
-//        $this->getBonBanh();
+        $this->getBonBanh();
 
-//        $this->getMuaBan();
+        $this->getMuaBan();
 
-//        $this->getOtoVietName();
+        $this->getOtoVietName();
 
 
-//        $this->getBanXeHoi();
+        $this->getBanXeHoi();
 
-//        $this->getChoXe();
+        $this->getChoXe();
 
-//        $this->getXe360();
+        $this->getXe360();
 
-//        $this->getXe5Giay();
+        $this->getXe5Giay();
 
-//        $this->getSanOtoVn();
+        $this->getSanOtoVn();
 
-//        $this->getMuaBanOto();
+        $this->getMuaBanOto();
 
 //        $this->getOtoS(); // khong lay dc
 
-//        $this->getMuaBanNhanh();
+        $this->getMuaBanNhanh();
 
         $this->getRongBay();
 
@@ -45,8 +44,19 @@ class CronController extends BaseController
 
         $this->getOtoThien();
 
+        $this->getBanOtoRe();
+
+        $this->getSanXeHot();
+
 
         //$this->addDataToSolr();
+    }
+
+    public function cronManual()
+    {
+        $this->getBanOtoRe();
+
+        $this->getSanXeHot();
     }
 
     public function bookAuto(Request $request)

@@ -363,7 +363,6 @@ class PhoneController extends BaseController
         }
         $phones = explode(',', $row->content);
         $phones = array_unique($phones);
-
         echo "======BEGIN=========<br/>";
         echo "Data: ". implode(',', $phones) . '<br/>';
         flush();
@@ -387,49 +386,56 @@ class PhoneController extends BaseController
         flush();
         ob_flush();
 
-        $phone = $phones[$step];
+        $phone = trim($phones[$step]);
+        if (!empty($phone)) {
+            echo 'Phone: ' . '<br/>';
+            var_dump($phone);
+            flush();
+            ob_flush();
 
-        $query = \App\Models\Contents::select('id', 'updated_at')
-            ->where(function($query) use ($phone) {
-                $query->where(\DB::raw('REPLACE("phone", "+84", "0")'), 'LIKE', "%{$phone}%")
-                    ->orWhere(\DB::raw('REPLACE("phone", ".", "")'), 'LIKE', "%{$phone}%")
-                    ->orWhere(\DB::raw('REPLACE("phone", " ", "")'), 'LIKE', "%{$phone}%")
-                    ->orWhere('phone', 'LIKE', "%{$phone}%");
-            })
-            ->orWhere(function($query) use ($phone) {
-                $query->where(\DB::raw('REPLACE("contact", "+84", "0")'), 'LIKE', "%{$phone}%")
-                    ->orWhere(\DB::raw('REPLACE("contact", ".", "")'), 'LIKE', "%{$phone}%")
-                    ->orWhere(\DB::raw('REPLACE("contact", " ", "")'), 'LIKE', "%{$phone}%")
-                    ->orWhere('contact', 'LIKE', "%{$phone}%");
-            })
-            ->orWhere(function($query) use ($phone) {
-                $query->where(\DB::raw('REPLACE("short_content", "+84", "0")'), 'LIKE', "%{$phone}%")
-                    ->orWhere(\DB::raw('REPLACE("short_content", ".", "")'), 'LIKE', "%{$phone}%")
-                    ->orWhere(\DB::raw('REPLACE("short_content", " ", "")'), 'LIKE', "%{$phone}%")
-                    ->orWhere('short_content', 'LIKE', "%{$phone}%");
-            });
+            $query = \App\Models\Contents::select('id', 'updated_at')
+                ->where(function($query) use ($phone) {
+                    $query->where(\DB::raw('REPLACE("phone", "+84", "0")'), 'LIKE', "%{$phone}%")
+                        ->orWhere(\DB::raw('REPLACE("phone", ".", "")'), 'LIKE', "%{$phone}%")
+                        ->orWhere(\DB::raw('REPLACE("phone", " ", "")'), 'LIKE', "%{$phone}%")
+                        ->orWhere('phone', 'LIKE', "%{$phone}%");
+                })
+                ->orWhere(function($query) use ($phone) {
+                    $query->where(\DB::raw('REPLACE("contact", "+84", "0")'), 'LIKE', "%{$phone}%")
+                        ->orWhere(\DB::raw('REPLACE("contact", ".", "")'), 'LIKE', "%{$phone}%")
+                        ->orWhere(\DB::raw('REPLACE("contact", " ", "")'), 'LIKE', "%{$phone}%")
+                        ->orWhere('contact', 'LIKE', "%{$phone}%");
+                })
+                ->orWhere(function($query) use ($phone) {
+                    $query->where(\DB::raw('REPLACE("short_content", "+84", "0")'), 'LIKE', "%{$phone}%")
+                        ->orWhere(\DB::raw('REPLACE("short_content", ".", "")'), 'LIKE', "%{$phone}%")
+                        ->orWhere(\DB::raw('REPLACE("short_content", " ", "")'), 'LIKE', "%{$phone}%")
+                        ->orWhere('short_content', 'LIKE', "%{$phone}%");
+                });
 
-        $rows = $query->get();
-        if ($rows !== NULL) {
-            foreach ($rows as $row) {
-                $updatedAt = $row->updated_at;
-                $data[] = "({$row->id}, 0, \"{$updatedAt}\")";
+            $rows = $query->get();
+            $data = array();
+            if ($rows !== NULL) {
+                foreach ($rows as $row) {
+                    $updatedAt = $row->updated_at;
+                    $data[] = "({$row->id}, 0, \"{$updatedAt}\")";
+                }
             }
-        }
-        unset($rows);
+            unset($rows);
 
-        if (count($data)) {
-            $fields = array('id', 'is_owner', 'updated_at');
-            $values = array('id=VALUES(id)', 'is_owner=VALUES(is_owner)', 'updated_at=VALUES(updated_at)');
-            $this->inserOrUpdate($fields, $data, $values);
-            unset($data);
-        }
-        echo '======END Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '==============<br/>';
-        flush();
-        ob_flush();
+            if (count($data)) {
+                $fields = array('id', 'is_owner', 'updated_at');
+                $values = array('id=VALUES(id)', 'is_owner=VALUES(is_owner)', 'updated_at=VALUES(updated_at)');
+                $this->inserOrUpdate($fields, $data, $values);
+                unset($data);
+            }
+            echo '======END Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '==============<br/>';
+            flush();
+            ob_flush();
 
-        $step++;
-        return $this->loopDefinePhone($step, $phones);
+            $step++;
+            return $this->loopDefinePhone($step, $phones);
+        }
     }
 
     protected function replaceString($string)

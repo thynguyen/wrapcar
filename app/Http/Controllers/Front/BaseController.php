@@ -444,6 +444,57 @@ class BaseController extends Controller
         ob_flush();
     }
 
+    protected function getBanOtoRe($page = 1, $limit = 12)
+    {
+        $dataOld = Contents::where('type', 'banotore')->orderBy('id', 'DESC')->first();
+
+        echo '======BEGIN BAN OTO RE========<br/>';
+        flush();
+        ob_flush();
+
+        ini_set('max_execution_time', 0);
+
+        $url = \config('wrap.url_site.banotore') . 'ban-xe/';
+
+        $html = HtmlDomParser::file_get_html($url);
+        $totalPage = 0;
+        $obj = @$html->find('#PageNum', 0);
+        if (is_object($obj)) {
+            $totalPage = @$obj->attr['value'];
+        }
+
+        unset($html);
+        if ($dataOld === NULL) {
+            $page = $totalPage;
+        }
+        $this->getContentBanOtoRe($page, $totalPage, $dataOld);
+
+        echo "======END BAN OTO RE=========<br/>";
+        flush();
+        ob_flush();
+    }
+
+    protected function getSanXeHot($page = 1, $limit = 16)
+    {
+        $dataOld = Contents::where('type', 'sanxehot')->orderBy('id', 'DESC')->first();
+
+        echo '======BEGIN SAN XE HOT========<br/>';
+        flush();
+        ob_flush();
+
+        ini_set('max_execution_time', 0);
+
+        $totalPage = 1000;
+        if ($dataOld === NULL) {
+            $page = $totalPage;
+        }
+        $this->getContentSanXeHot($page, $totalPage, $dataOld);
+
+        echo "======END SAN XE HOT=========<br/>";
+        flush();
+        ob_flush();
+    }
+
     protected function getTotalPage($total, $limit)
     {
         $page = 1;
@@ -2228,6 +2279,266 @@ class BaseController extends Controller
         }
     }
 
+    protected function getContentBanOtoRe($page, $totalPage, $dataOld)
+    {
+        $max_loop = false;
+        if ($page <= 0 || empty($page) || $page > $totalPage) {
+            return;
+        }
+        echo 'Page: ' . $page . '<br/>';
+        flush();
+        ob_flush();
+        if (empty($page)) {
+            return;
+        }
+
+        $url = \config('wrap.url_site.banotore');
+        $urlPaging = $url . 'ban-xe/p' . $page;
+
+        $html = $this->loopFetchUrl($urlPaging);
+        $items = null;
+        if (is_object($html)) {
+            $items = @$html->find('.post-list .post-item');
+        }
+
+        $data = array();
+        if (!$items) {
+            echo 'Item empty <br/>';
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
+            echo '=========================================================================<br/>';
+            flush();
+            ob_flush();
+
+            unset($html);
+            unset($items);
+        } else {
+            unset($html);
+
+            $pdo = DB::connection()->getPdo();
+
+            $domain = substr($url, 0, -1);
+            foreach ($items as $indexL => $item) {
+
+                $link = @$item->find('.pi-meta h3 a', 0)->href;
+                if ($this->type !== 'all') {
+                    $count = Contents::where('type', 'banotore')->where('link', $domain.$link)->count();
+                    if (!empty($count)) {
+//                        $page = -1;
+                        unset($count);
+                        $max_loop = true;
+                        $items[$indexL]->clear();
+                        continue;
+//                        break;
+                    }
+                }
+
+                $title = @$item->find('.pi-meta h3 a', 0)->plaintext;
+                $datePost = @$item->find('.pi-meta span.date', 0)->plaintext;
+                $ul0 = @$item->find('.pi-meta ul', 0);
+                $price = @$ul0->find('li', 0)->plaintext; 
+
+                $ul1 = @$item->find('.pi-meta ul', 1);
+                $city = @$ul1->find('li', 1)->plaintext;
+
+                $contact = $phone = null;
+                $contactTemp = @$ul1->find('li', 2);
+                if (is_object($contactTemp)) {
+                    $contact = $contactTemp->find('span', 1)->plaintext;
+                }
+                $phoneTemp = @$ul1->find('li', 3);
+                if (is_object($phoneTemp)) {
+                    $phone = $phoneTemp->find('span', 1)->plaintext;
+                }
+
+                $productYear = $color = $kmRun = $content = '';
+                $temp = $this->getDetailBanOtoRe($domain . $link);
+                if (count($temp)) {
+                    $productYear = $temp['productYear'];
+                    $color = $temp['color'];
+                    $kmRun = $temp['km_run'];
+                    $content = $temp['content'];
+                    unset($temp);
+                }
+
+                $title = $pdo->quote($title);
+                $datePost = $pdo->quote($datePost);
+                $link = $pdo->quote($domain . $link);
+                $price = $pdo->quote($price);
+                $city = $pdo->quote($city);
+                $phone = $pdo->quote($phone);
+                $contact = $pdo->quote($contact);
+                $productYear = $pdo->quote($productYear);
+                $color = $pdo->quote($color);
+                $kmRun = $pdo->quote($kmRun);
+                $content = $pdo->quote($content);
+
+                $createdAt = date('Y-m-d H:i:s');
+                $data[] = "($link, $title, $price, $phone, $city, $productYear, $contact, $color, $kmRun, $content, 'banotore', $datePost, \"$createdAt\")";
+
+                $items[$indexL]->clear();
+            }
+            unset($items);
+
+            echo 'Data count: '. count($data) . '<br/>';
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
+            echo '=========================================================================<br/>';
+            flush();
+            ob_flush();
+
+            if (count($data)) {
+                $fields = array('link', 'brand_car', 'price', 'phone', 'city', 'product_year', 'contact', 'color', 'km_run', 'short_content', 'type', 'date_post', 'created_at');
+                $values = array(
+                    'link=VALUES(link)', 'brand_car=VALUES(brand_car)', 'price=VALUES(price)', 
+                    'phone=VALUES(phone)', 'city=VALUES(city)', 'product_year=VALUES(product_year)', 'contact=VALUES(contact)',
+                    'color=VALUES(color)', 'km_run=VALUES(km_run)', 'short_content=VALUES(short_content)',
+                    'type=VALUES(type)', 'date_post=VALUES(date_post)', 'created_at=VALUES(created_at)');
+                $this->inserOrUpdate($fields, $data, $values);
+
+                unset($data);
+            }
+        }
+
+        if ($max_loop && $page >= 2) {
+            unset($max_loop);
+            return;
+        }
+
+        if ($page > 0 || $page < $totalPage) {
+            if ($dataOld === NULL) {
+                $page--;
+            } else {
+                $page++;
+            }
+            $this->getContentBanOtoRe($page, $totalPage, $dataOld);
+        }
+    }
+
+    protected function getContentSanXeHot($page, $totalPage, $dataOld)
+    {
+        $max_loop = false;
+        if ($page <= 0 || empty($page) || $page > $totalPage) {
+            return;
+        }
+        echo 'Page: ' . $page . '<br/>';
+        flush();
+        ob_flush();
+        if (empty($page)) {
+            return;
+        }
+
+        $url = \config('wrap.url_site.sanxehot');
+        $urlPaging = $url . 'mua-ban-xe-pg' . $page;
+
+        $html = $this->loopFetchUrl($urlPaging);
+        $items = null;
+        if (is_object($html)) {
+            $items = @$html->find('.list-car li');
+        }
+
+        $data = array();
+        if (!$items) {
+            echo 'Item empty <br/>';
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
+            echo '=========================================================================<br/>';
+            flush();
+            ob_flush();
+
+            unset($html);
+            unset($items);
+        } else {
+            unset($html);
+
+            $pdo = DB::connection()->getPdo();
+
+            $domain = substr($url, 0, -1);
+            foreach ($items as $indexL => $item) {
+
+                $link = @$item->find('div a', 0)->href;
+                if ($this->type !== 'all') {
+                    $count = Contents::where('type', 'sanxehot')->where('link', $domain.$link)->count();
+                    if (!empty($count)) {
+//                        $page = -1;
+                        unset($count);
+                        $max_loop = true;
+                        $items[$indexL]->clear();
+                        continue;
+//                        break;
+                    }
+                }
+
+                $title = @$item->find('div a', 0)->plaintext;
+
+                $phone = $kmRun = $city = $price = $contact = null;
+                $table = @$item->find('.mota', 0);
+                if (is_object($table)) {
+                    $kmRun = $table->find('tr', 0)->find('td', 0)->plaintext;
+                    $price = $table->find('tr', 0)->find('td', 1)->plaintext;
+                    $city = $table->find('tr', 2)->find('td', 1)->plaintext;
+                    $contact = $table->find('tr', 3)->find('td', 1)->plaintext;
+                    $phone = $table->find('tr', 4)->find('td', 1)->plaintext;
+                }
+
+                $productYear = $color = $content = '';
+                $temp = $this->getDetailSanXeHot($domain . $link);
+                if (count($temp)) {
+                    $productYear = $temp['productYear'];
+                    $color = $temp['color'];
+                    $content = $temp['content'];
+                    unset($temp);
+                }
+
+                $title = $pdo->quote($title);
+                $link = $pdo->quote($domain . $link);
+                $price = $pdo->quote($price);
+                $city = $pdo->quote($city);
+                $phone = $pdo->quote($phone);
+                $contact = $pdo->quote($contact);
+                $productYear = $pdo->quote($productYear);
+                $color = $pdo->quote($color);
+                $kmRun = $pdo->quote($kmRun);
+                $content = $pdo->quote($content);
+
+                $createdAt = date('Y-m-d H:i:s');
+                $data[] = "($link, $title, $price, $phone, $city, $productYear, $contact, $color, $kmRun, $content, 'sanxehot', \"$createdAt\")";
+
+                $items[$indexL]->clear();
+            }
+            unset($items);
+
+            echo 'Data count: '. count($data) . '<br/>';
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
+            echo '=========================================================================<br/>';
+            flush();
+            ob_flush();
+
+            if (count($data)) {
+                $fields = array('link', 'brand_car', 'price', 'phone', 'city', 'product_year', 'contact', 'color', 'km_run', 'short_content', 'type', 'created_at');
+                $values = array(
+                    'link=VALUES(link)', 'brand_car=VALUES(brand_car)', 'price=VALUES(price)', 
+                    'phone=VALUES(phone)', 'city=VALUES(city)', 'product_year=VALUES(product_year)', 'contact=VALUES(contact)',
+                    'color=VALUES(color)', 'km_run=VALUES(km_run)', 'short_content=VALUES(short_content)',
+                    'type=VALUES(type)', 'created_at=VALUES(created_at)');
+                $this->inserOrUpdate($fields, $data, $values);
+
+                unset($data);
+            }
+        }
+
+        if ($max_loop && $page >= 2) {
+            unset($max_loop);
+            return;
+        }
+
+        if ($page > 0 || $page < $totalPage) {
+            if ($dataOld === NULL) {
+                $page--;
+            } else {
+                $page++;
+            }
+            $this->getContentSanXeHot($page, $totalPage, $dataOld);
+        }
+    }
+
     protected function getDetailCarmudi($url, $sku)
     {
         $url  = $url . '/listings/getsellerphonenumbers/?sku=' . $sku;
@@ -2481,6 +2792,89 @@ class BaseController extends Controller
             $results['shortContent'] = trim($items->innertext());
 
             echo '========================================END Detail ENBAC======================================<br/><br/><br/>';
+            flush();
+            ob_flush();
+            unset($html);
+            return $results;
+        }
+    }
+
+    protected function getDetailBanOtoRe($url)
+    {
+        echo '========================================BEGIN Detail BAN OTO RE======================================<br/>';
+        flush();
+        ob_flush();
+
+        $html = $this->loopFetchUrl($url);
+        $items = null;
+        if (is_object($html)) {
+            $items = @$html->find('.info-detail', 0);
+        }
+
+        if (!$items) {
+            echo 'Item empty <br/>';
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
+            echo '=========================================================================<br/>';
+            flush();
+            ob_flush();
+            return null;
+
+            unset($html);
+            unset($items);
+        } else {
+            $ul = $items->find('.left-content ul', 0);
+            if(!is_object($ul)) {
+                return array();
+            }
+            $results = array(
+                'productYear' => $ul->find('li', 2)->find('span.content', 0)->plaintext,
+                'km_run' => $ul->find('li', 4)->find('span.content', 0)->plaintext,
+                'color' => $ul->find('li', 5)->find('span.content', 0)->plaintext,
+                'content' => trim($items->innertext()),
+            );
+
+            echo '========================================END Detail BAN OTO RE======================================<br/><br/><br/>';
+            flush();
+            ob_flush();
+            unset($html);
+            return $results;
+        }
+    }
+
+    protected function getDetailSanXeHot($url)
+    {
+        echo '========================================BEGIN Detail SAN XE HOT======================================<br/>';
+        flush();
+        ob_flush();
+
+        $html = $this->loopFetchUrl($url);
+        $items = null;
+        if (is_object($html)) {
+            $items = @$html->find('#chitietxe', 0);
+        }
+
+        if (!$items) {
+            echo 'Item empty <br/>';
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
+            echo '=========================================================================<br/>';
+            flush();
+            ob_flush();
+            return null;
+
+            unset($html);
+            unset($items);
+        } else {
+            $table = $items->find('table.info', 0);
+            if(!is_object($table)) {
+                return array();
+            }
+            $results = array(
+                'productYear' => $table->find('tr', 2)->find('td', 1)->plaintext,
+                'color' => $table->find('tr', 7)->find('td', 1)->plaintext,
+                'content' => trim($html->find('#mota', 0)->innertext()),
+            );
+
+            echo '========================================END Detail SAN XE HOT======================================<br/><br/><br/>';
             flush();
             ob_flush();
             unset($html);

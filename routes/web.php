@@ -13,6 +13,7 @@
 Route::match(['get', 'post'], '/login', 'Auth\LoginController@login')->name('auth_login');
 Route::get('logout', 'Auth\LoginController@logout')->name('logout');
 Route::get('front/cron', 'Front\CronController@index')->name('front_cron_index');
+Route::get('front/cron_manual', 'Front\CronController@cronManual')->name('front_cron_manual');
 Route::get('front/book_auto', 'Front\CronController@bookAuto')->name('front_cron_book_auto');
 Route::get('front/test_email', 'Front\CronController@testEmail')->name('front_cron_test_email');
 Route::get('front/test_bookauto', 'Front\CronController@testBookAuto')->name('front_cron_test_book');

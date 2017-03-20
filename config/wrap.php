@@ -29,6 +29,9 @@ return [
         'thegioixeoto' => 'http://thegioixeoto.com/',
         'otothien' => 'https://otothien.vn/',
         'cafeauto' => 'http://cafeauto.vn/',
+        'banotore' => 'https://banotore.com/',
+        'motoring' => 'http://motoring.vn/',
+        'sanxehot' => 'https://www.sanxehot.vn/',
     ),
     'brands' => array(
         '' => '--Thương hiệu--',
