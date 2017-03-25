@@ -91,17 +91,19 @@ class Contents extends Model
             $query->where('city', 'LIKE', "%{$city}%");
         }
 
-        $query->where('is_owner', '=', $isOwner);
-
         $total = $query->count();
         if (!$total) {
             return array();
         }
         $this->setTotal($total);
+        $query->where('is_owner', '=', $isOwner);
 
         $query->unionAll($this->getContentNotOwner($keyword, $timeVal, $city));
 
+        
         $query->skip($offset)->take($limit);
+//        $query->groupBy('id');
+        $query->orderBy('is_owner', 'DESC');
 
         return $query->get();
 //        return $query->paginate(20);

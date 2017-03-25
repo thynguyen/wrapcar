@@ -5,6 +5,7 @@
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
     <section class="content-header">
+        <a class="btn btn-warning" href="{{ route('front_cron_push_phone_define') }}" target="_blank">Run update</a>
         <h1>Phone Black List</h1>
     </section>
 

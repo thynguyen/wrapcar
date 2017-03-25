@@ -356,9 +356,11 @@ class PhoneController extends BaseController
 
         $row = \App\Models\PhoneExcept::where(\DB::raw('DATE_FORMAT(updated_at, "%Y-%m-%d")'), '=', $now)->first();
         if ($row === null) {
+            echo 'Please update data before run';
             return;
         }
         if (empty($row->content)) {
+            echo 'Please update data before run';
             return;
         }
         $phones = explode(',', $row->content);
