@@ -18,7 +18,7 @@
                         <div class="box-body">
                             <div class="form-group @if ($errors->has('phone')) has-error @endif">
                                 <label class="control-label">Phone Black List</label>
-                                <textarea class="form-control" rows="5" id="phone" name="phone" style="resize: none;">{{ old('name', isset($phone->content) ? $phone->content : '') }}</textarea>
+                                <textarea class="form-control" rows="5" id="phone" name="phone" style="resize: none; height: 300px;">{{ old('name', isset($phone->content) ? $phone->content : '') }}</textarea>
                                 <p class="help-block">Ví dụ: 0909112233,0909334455,...</p>
                                 @if ($errors->has('phone'))
                                   <p class="help-block">{{ $errors->first('phone') }}</p>

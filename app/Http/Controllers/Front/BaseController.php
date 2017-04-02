@@ -51,6 +51,55 @@ class BaseController extends Controller
         ob_flush();
     }
 
+    protected function getChoTot($page = 1, $limit = 20)
+    {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, 'https://xe.chotot.com/toan-quoc/mua-ban-o-to');
+        curl_setopt($ch, CURLOPT_HEADER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSLVERSION, 0); // OpenSSL issue
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST , 2);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER , 0);
+        $header = curl_exec($ch);
+        $error = curl_error($ch);
+        var_dump($error);
+        echo '<pre>';print_r($header);exit;
+	exit;
+
+        $dataOld = Contents::where('type', 'chotot')->orderBy('id', 'DESC')->first();
+
+        echo '======BEGIN chotot=========<br/>';
+        flush();
+        ob_flush();
+
+        ini_set('max_execution_time', 0);
+
+        $url = \config('wrap.url_site.chotot');
+
+        $html = HtmlDomParser::file_get_html($url);
+        $textTotal = $html->find('div.pagging div.cpage', 0)->innertext();
+        unset($html);
+
+        preg_match_all('/<b>([^{]*)<\/b>/s', $textTotal, $matches);
+
+        $totalPage = 1;
+        if (isset($matches[1][0])) {
+            $number = str_replace(',', '', $matches[1][0]);
+            preg_match_all('/\d+/', $number, $matches);
+            $total = isset($matches[0][0]) ? $matches[0][0] : 0;
+            $totalPage = $this->getTotalPage($total, $limit);
+        }
+        if ($dataOld === NULL) {
+            $page = $totalPage;
+        }
+        $this->getContentBonBanh($page, $totalPage, $dataOld);
+
+        echo "======END bonbanh=========<br/>";
+        flush();
+        ob_flush();
+    }
+
     protected function getMuaBan($page = 1, $limit = 20)
     {
         $dataOld = Contents::where('type', 'mua_ban')->orderBy('id', 'DESC')->first();
@@ -72,9 +121,9 @@ class BaseController extends Controller
         ob_flush();
     }
 
-    protected function getOtoVietName($page = 1, $limit = 20)
+    protected function getOtoVietNam($page = 1, $limit = 20, $type = null)
     {
-        $dataOld = Contents::where('type', 'cho_tot')->orderBy('id', 'DESC')->first();
+        $dataOld = Contents::where('type', 'otovietnam')->orderBy('id', 'DESC')->first();
 
         echo '======BEGIN OTO VIET NAM=========<br/>';
         flush();
@@ -85,12 +134,14 @@ class BaseController extends Controller
             DEFINE('MAX_FILE_SIZE', 6000000);
         }
 
-        $totalPage = 1; // Only one page
+        $url = \config('wrap.url_site.otovietnam') . 'forums/xe-moi.' . $type;
+        $html = HtmlDomParser::file_get_html($url);
+        $attr = $html->find('div.PageNav', 0)->attr;
+        $totalPage = isset($attr['data-last']) ? $attr['data-last'] : 0;
         if ($dataOld === NULL) {
             $page = $totalPage;
         }
-        $this->getContentOtoVietNam($page, $totalPage, $dataOld, 'ul.bdImage_Widget_Grid', 0);
-        $this->getContentOtoVietNam($page, $totalPage, $dataOld, 'ul.bdImage_Widget_Grid', 1);
+        $this->getContentOtoVietNam($page, $totalPage, $dataOld, $type);
 
         echo "======END OTO VIET NAM=========<br/>";
         flush();
@@ -544,7 +595,11 @@ class BaseController extends Controller
             $domain = \config('wrap.url_site.bonbanh');
 
             foreach ($items as $indexL => $item) {
-                $link = trim($item->find('div', 4)->find('a',0)->href);
+                $objA = $item->find('a',0);
+                if (!is_object($objA)) {
+                    continue;
+                }
+                $link = trim($objA->href);
                 if ($this->type !== 'all') {
                     $count = Contents::where('type', 'bon_banh')->where('link', $domain . $link)->count();
                     if (!empty($count)) {
@@ -557,8 +612,8 @@ class BaseController extends Controller
                     }
                 }
 
-                $productYear = trim($item->find('div', 0)->innertext());
-                $title = trim($item->find('div', 1)->plaintext); // brand car
+                $productYear = trim($objA->find('div', 0)->plaintext);
+                $title = trim($objA->find('div', 1)->plaintext); // brand car
                 $price = trim($item->find('div', 2)->innertext());
                 $city = trim($item->find('div', 3)->plaintext);
                 $carCode = trim($item->find('div', 4)->find('span.car_code', 0)->plaintext);
@@ -717,21 +772,22 @@ class BaseController extends Controller
         }
     }
 
-    protected function getContentOtoVietNam($page, $totalPage, $dataOld, $class, $position)
+    protected function getContentOtoVietNam($page, $totalPage, $dataOld, $type)
     {
+        $max_loop = false;
         echo 'Page: ' . $page . '<br/>';
         flush();
         ob_flush();
+
         if ($page <= 0 || $page > $totalPage) {
             return;
         }
 
-        $url = \config('wrap.url_site.otovietnam');
-
+        $url = \config('wrap.url_site.otovietnam') . 'forums/xe-moi.' . $type . '/page-' . $page;
         $html = $this->loopFetchUrl($url);
         $items = null;
         if (is_object($html)) {
-            $items = $html->find($class, $position)->find('li');
+            $items = $html->find('ol.discussionListItems li');
         }
 
         $data = array();
@@ -750,12 +806,18 @@ class BaseController extends Controller
             $pdo = DB::connection()->getPdo();
             $domain = \config('wrap.url_site.otovietnam');
 
+            $const = ($type == '305') ? 3 : 2;
             foreach ($items as $indexL => $item) {
-                $link = trim(@$item->find('a', 1)->href);
+                if ($indexL <= $const) {
+                    continue;
+                }
+
+                $link = trim(@$item->find('div', 1)->find('a.PreviewTooltip', 0)->href);
                 if ($this->type !== 'all') {
                     $count = Contents::where('type', 'otovietnam')->where('link', $domain . $link)->count();
                     if (!empty($count)) {
 //                        $page = -1;
+                        $max_loop = true;
                         unset($count);
                         $items[$indexL]->clear();
                         continue;
@@ -763,31 +825,36 @@ class BaseController extends Controller
                     }
                 }
 
-                $title = trim(@$item->find('a', 1)->plaintext); // brand car
-                $price = trim(@$item->find('.threadPrice', 0)->plaintext);
-                $atrDatePost = @$item->find('.threadDate abbr', 0)->attr;
-                $kmRun = trim(@$item->find('.threadOdo', 0)->plaintext);
-                $datePost = isset($atrDatePost['data-time']) ? date('Y-m-d', $atrDatePost['data-time']) : null;
+//                $title = trim(@$item->find('a', 1)->plaintext); // brand car
+//                $price = trim(@$item->find('.threadPrice', 0)->plaintext);
+//                $atrDatePost = @$item->find('div', 1)->find('span.DateTime', 0)->plaintext;
+//                $kmRun = trim(@$item->find('.threadOdo', 0)->plaintext);
+//                $datePost = isset($atrDatePost['data-time']) ? date('Y-m-d', $atrDatePost['data-time']) : null;
 
-                $urlDetail = $url . $link;
+                $urlDetail = \config('wrap.url_site.otovietnam') . $link;
                 $details = $this->getDetailOtoVietNam($urlDetail);
+
+                $title = isset($details['title']) ? $details['title'] : null;
                 $city = isset($details['city']) ? $details['city'] : null;
+//                $phone = isset($details['phone']) ? $details['phone'] : null;
+                $contact = isset($details['contact']) ? $details['contact'] : null;
+                $price = isset($details['price']) ? $details['price'] : null;
                 $color = isset($details['color']) ? $details['color'] : null;
-                $productYear = isset($details['productYear']) ? $details['productYear'] : null;
+                $kmRun = isset($details['km_run']) ? $details['km_run'] : null;
                 $shortContent = isset($details['shortContent']) ? $details['shortContent'] : null;
 
                 $title = $pdo->quote($title);
                 $link = $pdo->quote($domain . $link);
                 $price = $pdo->quote($price);
-                $datePost = $pdo->quote($datePost);
                 $kmRun = $pdo->quote($kmRun);
                 $city = $pdo->quote($city);
                 $color = $pdo->quote($color);
-                $productYear = $pdo->quote($productYear);
+                $contact = $pdo->quote($contact);
+//                $phone = $pdo->quote($phone);
                 $shortContent = $pdo->quote($shortContent);
 
                 $createdAt = date('Y-m-d H:i:s');
-                $data[] = "($link, $title, $price, $datePost, $kmRun, $city, $color, $productYear, $shortContent, 'otovietnam', \"$createdAt\")";
+                $data[] = "($link, $title, $price, $kmRun, $city, $color, $contact, $shortContent, 'otovietnam', \"$createdAt\")";
 
                 $items[$indexL]->clear();
             }
@@ -800,17 +867,30 @@ class BaseController extends Controller
             ob_flush();
 
             if (count($data)) {
-                $fields = array('link', 'brand_car', 'price', 'date_post', 'km_run', 'city', 'color', 'product_year', 'short_content', 'type', 'created_at');
+                $fields = array('link', 'brand_car', 'price', 'km_run', 'city', 'color', 'contact', 'short_content', 'type', 'created_at');
                 $values = array(
-                    'link=VALUES(link)', 'brand_car=VALUES(brand_car)', 'price=VALUES(price)', 'date_post=VALUES(date_post)', 
-                    'km_run=VALUES(km_run)', 'city=VALUES(city)', 'color=VALUES(color)', 'product_year=VALUES(product_year)',
+                    'link=VALUES(link)', 'brand_car=VALUES(brand_car)', 'price=VALUES(price)',
+                    'km_run=VALUES(km_run)', 'city=VALUES(city)', 'color=VALUES(color)', 'contact=VALUES(contact)',
                     'short_content=VALUES(short_content)', 'type=VALUES(type)', 'created_at=VALUES(created_at)');
                 $this->inserOrUpdate($fields, $data, $values);
 
                 unset($data);
             }
         }
-        return;
+
+        if ($max_loop && $page >= 2) {
+            unset($max_loop);
+            return;
+        }
+
+        if ($page > 0 || $page < $totalPage) {
+            if ($dataOld === NULL) {
+                $page--;
+            } else {
+                $page++;
+            }
+            $this->getContentOtoVietNam($page, $totalPage, $dataOld, $type);
+        }
     }
 
     protected function getContentCarmudi($page, $totalPage, $dataOld)
@@ -908,7 +988,7 @@ class BaseController extends Controller
                 unset($data);
             }
         }
-        
+
         if ($max_loop && $page >= 2) {
             unset($max_loop);
             return;
@@ -2586,7 +2666,7 @@ class BaseController extends Controller
         $html = $this->loopFetchUrl($url);
         $items = null;
         if (is_object($html)) {
-            $items = @$html->find('.osThreadFieldsDetails', 0);
+            $items = @$html->find('.osThreadFieldsDetailsWrapper', 0);
         }
 
         if (!$items) {
@@ -2601,11 +2681,14 @@ class BaseController extends Controller
             unset($items);
         } else {
             $results = array();
-            $results['city'] = trim(@$items->find('.city', 0)->plaintext);
-            $results['productYear'] = trim(@$items->find('.nsx', 0)->plaintext);
-            $results['color'] = trim(@$items->find('.color', 0)->plaintext);
-            $results['shortContent'] = trim(@$html->find('.messageContent', 0)->plaintext);
+            $results['title'] = trim(@$html->find('.titleBar h1', 0)->plaintext);
 
+            $results['city'] = trim(@$items->find('dl dd.city', 0)->plaintext);
+            $results['contact'] = trim(@$items->find('dl dd.address', 0)->plaintext);
+            $results['price'] = trim(@$items->find('dl dd.price', 0)->plaintext);
+            $results['color'] = trim(@$items->find('dl dd.color', 0)->plaintext);
+            $results['km_run'] = trim(@$items->find('dl dd.distance', 0)->plaintext);
+            $results['shortContent'] = trim(@$html->find('.messageContent', 0)->innertext());
             unset($html);
 
             return $results;

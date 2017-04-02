@@ -15,8 +15,8 @@ class CronController extends BaseController
 
         $this->getMuaBan();
 
-        $this->getOtoVietName();
-
+        $this->getOtoVietNam(1, 20, '304');
+        $this->getOtoVietNam(1, 20, '305');
 
         $this->getBanXeHoi();
 
@@ -54,9 +54,14 @@ class CronController extends BaseController
 
     public function cronManual()
     {
-        $this->getBanOtoRe();
+        $this->getCarmundi();
 
-        $this->getSanXeHot();
+        $this->getMuaBan();
+
+        $this->getBanXeHoi();
+
+        $this->getOtoVietNam(1, 20, '304');
+        $this->getOtoVietNam(1, 20, '305');
     }
 
     public function bookAuto(Request $request)

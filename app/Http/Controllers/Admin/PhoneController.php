@@ -35,11 +35,23 @@ class PhoneController extends Controller
                             ->withErrors($validator)
                             ->withInput();
             }
-
+            $phones = $request->get('phone');
+            $phones = explode(',', $phones);
+            $phones = array_filter($phones);
+            $arr = array_count_values($phones);
+            $dup = array();
+            foreach ($arr as $key => $item) {
+                if (!empty($item) && $item > 1) {
+                    $dup[] = $key;
+                }
+            }
             $phone->content = $request->get('phone');
             $phone->created_at = date('Y-m-d H:i:s');
             $phone->save();
             $request->session()->flash('success', 'Cập nhật thành công');
+            if (count($dup)) {
+                $request->session()->flash('warning', 'Phone bị trùng: ' . implode(',', $dup));
+            }
             return redirect(route('admin_phone_black_list'));
         }
 
