@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 class BaseController extends Controller
 {
     public $type = null;
+    public $step_fail = 0;
 
     public function __construct(Request $request) {
         $this->type = $request->get('type');
@@ -31,7 +32,6 @@ class BaseController extends Controller
         $html = HtmlDomParser::file_get_html($url);
         $textTotal = $html->find('div.pagging div.cpage', 0)->innertext();
         unset($html);
-
         preg_match_all('/<b>([^{]*)<\/b>/s', $textTotal, $matches);
 
         $totalPage = 1;
@@ -54,17 +54,18 @@ class BaseController extends Controller
     protected function getChoTot($page = 1, $limit = 20)
     {
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, 'https://xe.chotot.com/toan-quoc/mua-ban-o-to');
+        curl_setopt($ch, CURLOPT_URL, 'https://www.carmudi.vn/all/?sort=suggested&page=1');
         curl_setopt($ch, CURLOPT_HEADER, true);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSLVERSION, 0); // OpenSSL issue
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST , 2);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST , 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER , 0);
-        $header = curl_exec($ch);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT ,0); 
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        $content = curl_exec($ch);
         $error = curl_error($ch);
         var_dump($error);
-        echo '<pre>';print_r($header);exit;
+        echo $content;
 	exit;
 
         $dataOld = Contents::where('type', 'chotot')->orderBy('id', 'DESC')->first();
@@ -151,7 +152,6 @@ class BaseController extends Controller
     protected function getCarmundi($page = 1, $limit = 20)
     {
         $dataOld = Contents::where('type', 'carmudi')->orderBy('id', 'DESC')->first();
-
         echo '======BEGIN CARMUDI=========<br/>';
         flush();
         ob_flush();
@@ -167,8 +167,14 @@ class BaseController extends Controller
             unset($html);
             return;
         }
-        $attrs = $html->find('ul.pagination', 0)->attr;
+        $obj = $html->find('ul.pagination', 0);
+        if (!is_object($obj)) {
+            unset($obj);
+            return;
+        }
         unset($html);
+        $attrs = $obj->attr;
+        unset($obj);
 
         $totalPage = isset($attrs['data-total-pages']) ? $attrs['data-total-pages'] : 0;
         if (empty($totalPage)) {
@@ -306,11 +312,11 @@ class BaseController extends Controller
 
         $url = \config('wrap.url_site.sanotovn');
 
-        $html = HtmlDomParser::file_get_html($url . 'oto/?page=1');
-        $href = @$html->find('.pagination li', 6)->find('a', 0)->href;
-        $totalPage = str_replace('/oto?page=', '', $href);
-        unset($html);
-
+        //$html = HtmlDomParser::file_get_html($url . 'oto/?page=1');
+        //$href = @$html->find('.pagination li', 6)->find('a', 0)->href;
+        //$totalPage = str_replace('/oto?page=', '', $href);
+        //unset($html);
+        $totalPage = 434;
         if ($dataOld === NULL) {
             $page = $totalPage;
         }
@@ -571,13 +577,11 @@ class BaseController extends Controller
         }
 
         $url = \config('wrap.url_site.bonbanh') . 'oto/page,'.$page.'/';
-
         $html = $this->loopFetchUrl($url);
         $items = null;
         if (is_object($html)) {
             $items = $html->find('.g-box-content .car-item');
         }
-
         $data = array();
         if (!$items) {
             echo 'Item empty <br/>';
@@ -597,18 +601,19 @@ class BaseController extends Controller
             foreach ($items as $indexL => $item) {
                 $objA = $item->find('a',0);
                 if (!is_object($objA)) {
+                    unset($objA);
                     continue;
                 }
+
                 $link = trim($objA->href);
                 if ($this->type !== 'all') {
                     $count = Contents::where('type', 'bon_banh')->where('link', $domain . $link)->count();
                     if (!empty($count)) {
-////                        $page = -1;
                         unset($count);
-                        $items[$indexL]->clear();
                         $max_loop = true;
+                        $items[$indexL]->clear();
+                        unset($objA);
                         continue;
-////                        break;
                     }
                 }
 
@@ -632,9 +637,11 @@ class BaseController extends Controller
                 $createdAt = date('Y-m-d H:i:s');
                 $data[] = "($link, $carCode, $productYear, $title, $price, $contactAndPhone, $city, $shortContent, 'bon_banh', \"$createdAt\")";
 
+                unset($objA);
                 $items[$indexL]->clear();
             }
             unset($items);
+            unset($pdo);
 
             echo 'Data count: '. count($data) . '<br/>';
             echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
@@ -718,23 +725,32 @@ class BaseController extends Controller
                 $title = trim(@$item->find('div.mbn-content .mbn-title', 0)->plaintext); // brand car
                 $price = trim(@$item->find('div.mbn-content .mbn-price', 0)->plaintext);
                 $city = trim(@$item->find('div.mbn-content .mbn-address', 0)->plaintext);
-                $datePost = trim(@$item->find('div.mbn-content .mbn-date', 0)->plaintext);
-                $summary = trim(@$item->find('div.mbn-content .mbn-item-summary', 0));
+//                $datePost = trim(@$item->find('div.mbn-content .mbn-date', 0)->plaintext);
+//                $summary = trim(@$item->find('div.mbn-content .mbn-item-summary', 0));
+//                $shortContent = null;
+//                if (is_object($summary)) {
+//                    $shortContent = trim($summary->innertext());
+//                }
 
-                $shortContent = null;
-                if (is_object($summary)) {
-                    $shortContent = trim($summary->innertext());
-                }
+                $detail = $this->getDetailMuaBan($link);
+                $phone = isset($detail['phone']) ? $detail['phone'] : null;
+                $shortContent = isset($detail['shortContent']) ? $detail['shortContent'] : null;
+                $productYear = isset($detail['productYear']) ? $detail['productYear'] : null;
+                $color = isset($detail['color']) ? $detail['color'] : null;
+                $contact = isset($detail['contact']) ? $detail['contact'] : null;
 
                 $title = $pdo->quote($title);
                 $link = $pdo->quote($link);
                 $price = $pdo->quote($price);
                 $city = $pdo->quote($city);
-
+                $phone = $pdo->quote($phone);
+                $productYear = $pdo->quote($productYear);
+                $color = $pdo->quote($color);
+                $contact = $pdo->quote($contact);
                 $shortContent = $pdo->quote($shortContent);
 
                 $createdAt = date('Y-m-d H:i:s');
-                $data[] = "($link, $title, $price, $city, $shortContent, 'mua_ban', $datePost, \"$createdAt\")";
+                $data[] = "($link, $title, $price, $phone, $contact, $city, $productYear, $color, $shortContent, 'mua_ban', \"$createdAt\")";
 
                 $items[$indexL]->clear();
             }
@@ -747,10 +763,12 @@ class BaseController extends Controller
             ob_flush();
 
             if (count($data)) {
-                $fields = array('link', 'brand_car', 'price', 'city', 'short_content', 'type', 'date_post', 'created_at');
+                $fields = array('link', 'brand_car', 'price', 'phone', 'contact', 'city', 'product_year', 'color', 'short_content', 'type', 'created_at');
                 $values = array(
-                    'link=VALUES(link)', 'brand_car=VALUES(brand_car)', 'price=VALUES(price)', 'city=VALUES(city)', 'short_content=VALUES(short_content)', 
-                    'type=VALUES(type)', 'date_post=VALUES(date_post)', 'created_at=VALUES(created_at)');
+                    'link=VALUES(link)', 'brand_car=VALUES(brand_car)', 'price=VALUES(price)', 
+                    'phone=VALUES(phone)', 'contact=VALUES(contact)', 'city=VALUES(city)', 'product_year=VALUES(product_year)',
+                    'color=VALUES(color)', 'short_content=VALUES(short_content)', 
+                    'type=VALUES(type)', 'created_at=VALUES(created_at)');
                 $this->inserOrUpdate($fields, $data, $values);
 
                 unset($data);
@@ -1021,7 +1039,6 @@ class BaseController extends Controller
         if (is_object($html)) {
             $items = $html->find('.listcar .sellcar-item');
         }
-
         $data = array();
         if (!$items) {
             echo 'Item empty <br/>';
@@ -1040,10 +1057,12 @@ class BaseController extends Controller
             $domain = substr($domain, 0, -1);
 
             foreach ($items as $indexL => $item) {
+                $attr = @$item->attr;
+                $class = isset($attr['class']) ? $attr['class'] : null;
                 $link = trim(@$item->find('.info .opensanslistauto', 0)->href);
                 if ($this->type !== 'all') {
                     $count = Contents::where('type', 'ban_xe_hoi')->where('link', $domain . $link)->count();
-                    if (!empty($count)) {
+                    if (!empty($count) && preg_match('/vippro/i', $class)) {
 //                        $page = -1;
                         $max_loop = true;
                         unset($count);
@@ -1101,7 +1120,6 @@ class BaseController extends Controller
                 unset($data);
             }
         }
-
         if ($max_loop && $page >= 2) {
             unset($max_loop);
             return;
@@ -1405,7 +1423,7 @@ class BaseController extends Controller
                 $title = trim(@$item->find('.main .title a', 0)->plaintext); // brand car
                 $datePost = trim(@$item->find('.main .secondRow .DateTime', 0)->plaintext);
 
-                $shortContent = trim(@$item->find('.listBlock', 0)->innertext());
+                $shortContent = trim(@$item->find('.main', 0)->innertext());
                 /*
                 $shortContent = null;
                 if (!empty($link)) {
@@ -1742,12 +1760,12 @@ class BaseController extends Controller
                     }
                 }
 
-                $title = @$item->find('.block-summary a', 0)->plaintext;
-                $price = @$item->find('.block-summary .box-price .price-new', 0)->plaintext;
-                $district = @$item->find('.block-summary .quick-view a', 0)->plaintext;
-                $city = @$item->find('.block-summary .quick-view a', 1)->plaintext;
-                $shortContent = @$item->find('.block-summary .create-content-more', 0)->plaintext;
-                $phone = @$item->find('.box-footer span.no-display', 0)->plaintext;
+                $title = trim(@$item->find('.block-summary a', 0)->plaintext);
+                $price = trim(@$item->find('.block-summary .box-price .price-new', 0)->plaintext);
+                $district = trim(@$item->find('.block-summary .quick-view a', 0)->plaintext);
+                $city = trim(@$item->find('.block-summary .quick-view a', 1)->plaintext);
+                $shortContent = trim(@$item->find('.block-summary .create-content-more', 0)->plaintext);
+                $phone = trim(@$item->find('.box-footer span.no-display', 0)->plaintext);
                 $phone = str_replace(' ', '', $phone);
 
                 $title = $pdo->quote($title);
@@ -1755,7 +1773,7 @@ class BaseController extends Controller
                 $price = $pdo->quote($price);
                 $city = $pdo->quote($district . $city);
                 $phone = $pdo->quote($phone);
-                $shortContent = $pdo->quote($shortContent);
+                $shortContent = $pdo->quote('');
 
                 $createdAt = date('Y-m-d H:i:s');
                 $data[] = "($link, $title, $price, $phone, $city, $shortContent, 'muaban_nhanh', \"$createdAt\")";
@@ -2661,6 +2679,51 @@ class BaseController extends Controller
         return null;
     }
 
+    protected function getDetailMuaBan($url)
+    {
+        $html = $this->loopFetchUrl($url);
+        if (!is_object($html)) {
+            echo 'Item empty <br/>';
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
+            echo '=========================================================================<br/>';
+            flush();
+            ob_flush();
+            return null;
+
+            unset($html);
+        } else {
+            $results = array();
+            $phone = $html->find('.contact-mobile', 0);
+            if (is_object($phone)) {
+                $results['phone'] = trim($phone->plaintext);
+            }
+            $contact = $html->find('.contact-name', 0);
+            if (is_object($contact)) {
+                $results['contact'] = trim($contact->plaintext);
+            }
+
+            $shortContent = $html->find('.ct-tech', 0);
+            if (is_object($shortContent)) {
+                $results['shortContent'] = trim($shortContent->innertext());
+            }
+            $productYear = $html->find('.ct-tech ul li', 0);
+            if (is_object($productYear)) {
+                $results['productYear'] = $productYear->find('.item-value', 0)->plaintext;
+            }
+            $color = $html->find('.ct-tech ul li', 5);
+            if (is_object($color)) {
+                $results['color'] = $color->find('.item-value', 0)->plaintext;
+            }
+
+            unset($shortContent);
+            unset($productYear);
+            unset($color);
+            unset($html);
+
+            return $results;
+        }
+    }
+
     protected function getDetailOtoVietNam($url)
     {
         $html = $this->loopFetchUrl($url);
@@ -2688,7 +2751,7 @@ class BaseController extends Controller
             $results['price'] = trim(@$items->find('dl dd.price', 0)->plaintext);
             $results['color'] = trim(@$items->find('dl dd.color', 0)->plaintext);
             $results['km_run'] = trim(@$items->find('dl dd.distance', 0)->plaintext);
-            $results['shortContent'] = trim(@$html->find('.messageContent', 0)->innertext());
+            $results['shortContent'] = trim(@$html->find('.osThreadFieldsDetails', 0)->plaintext);
             unset($html);
 
             return $results;
@@ -2838,7 +2901,7 @@ class BaseController extends Controller
             $results['color'] = trim(@$items->find('.table-striped', 1)->find('tr', 0)->find('td', 0)->plaintext);
             $results['runKm'] = trim(@$items->find('.table-striped', 1)->find('tr', 3)->find('td', 0)->plaintext);
 
-            $results['shortContent'] = trim(@$html->find('.product-content', 0)->innertext());
+            $results['shortContent'] = trim(@$html->find('.table-striped ', 0)->parent()->innertext()) . trim(@$html->find('.table-striped ', 1)->parent()->innertext());
 
             echo '========================================END Detail SanOto======================================<br/><br/><br/>';
             flush();
@@ -2975,12 +3038,18 @@ class BaseController extends Controller
             $html = HtmlDomParser::file_get_html($url);
             return $html;
         } catch (\Exception $e) {
+            $this->step_fail++;
             echo 'Fail connecttion <br/>';
+            echo 'Step fail: ' . $this->step_fail . '<br/>';
             flush();
             ob_flush();
 
-            sleep(5);
-            $this->loopFetchUrl($url);
+            if ($this->step_fail <= 2) {
+                sleep(5);
+                $this->loopFetchUrl($url);
+            } else {
+                $this->step_fail = 0;
+            }
         }
     }
 

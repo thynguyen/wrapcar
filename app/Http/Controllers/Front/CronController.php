@@ -10,9 +10,7 @@ class CronController extends BaseController
     public function index(Request $request)
     {
         $this->getCarmundi();
-
         $this->getBonBanh();
-
         $this->getMuaBan();
 
         $this->getOtoVietNam(1, 20, '304');
@@ -42,7 +40,7 @@ class CronController extends BaseController
 
         $this->getTheGioiXeOto();
 
-        $this->getOtoThien();
+        $this->getOtoThien(); // change giao dien
 
         $this->getBanOtoRe();
 
@@ -59,6 +57,8 @@ class CronController extends BaseController
         $this->getMuaBan();
 
         $this->getBanXeHoi();
+
+        $this->getMuaBanNhanh(); // still dump
 
         $this->getOtoVietNam(1, 20, '304');
         $this->getOtoVietNam(1, 20, '305');
