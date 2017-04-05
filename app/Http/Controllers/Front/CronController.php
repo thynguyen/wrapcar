@@ -9,6 +9,8 @@ class CronController extends BaseController
 {
     public function index(Request $request)
     {
+        $this->getChoTot();
+
         $this->getCarmundi();
         $this->getBonBanh();
         $this->getMuaBan();
@@ -40,7 +42,7 @@ class CronController extends BaseController
 
         $this->getTheGioiXeOto();
 
-        $this->getOtoThien(); // change giao dien
+        $this->getOtoThien();
 
         $this->getBanOtoRe();
 
@@ -52,6 +54,8 @@ class CronController extends BaseController
 
     public function cronManual()
     {
+        $this->getChoTot();
+
         $this->getCarmundi();
 
         $this->getMuaBan();

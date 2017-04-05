@@ -53,21 +53,6 @@ class BaseController extends Controller
 
     protected function getChoTot($page = 1, $limit = 20)
     {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, 'https://www.carmudi.vn/all/?sort=suggested&page=1');
-        curl_setopt($ch, CURLOPT_HEADER, true);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST , 0);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER , 0);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT ,0); 
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-        $content = curl_exec($ch);
-        $error = curl_error($ch);
-        var_dump($error);
-        echo $content;
-	exit;
-
         $dataOld = Contents::where('type', 'chotot')->orderBy('id', 'DESC')->first();
 
         echo '======BEGIN chotot=========<br/>';
@@ -76,29 +61,216 @@ class BaseController extends Controller
 
         ini_set('max_execution_time', 0);
 
-        $url = \config('wrap.url_site.chotot');
+        $url = sprintf(\config('wrap.url_site.chotot_gateway'), $page, $limit, 0);
+        $data = $this->execCurl($url);
 
-        $html = HtmlDomParser::file_get_html($url);
-        $textTotal = $html->find('div.pagging div.cpage', 0)->innertext();
-        unset($html);
-
-        preg_match_all('/<b>([^{]*)<\/b>/s', $textTotal, $matches);
-
-        $totalPage = 1;
-        if (isset($matches[1][0])) {
-            $number = str_replace(',', '', $matches[1][0]);
-            preg_match_all('/\d+/', $number, $matches);
-            $total = isset($matches[0][0]) ? $matches[0][0] : 0;
-            $totalPage = $this->getTotalPage($total, $limit);
+        if ($data === null) {
+            Log::debug('Can not get content chotot');
+            return;
         }
+        $total = $data['total'];
+        $totalPage = $this->getTotalPage($total, $limit);
+
         if ($dataOld === NULL) {
             $page = $totalPage;
         }
-        $this->getContentBonBanh($page, $totalPage, $dataOld);
 
-        echo "======END bonbanh=========<br/>";
+        $this->getContentChotot($page, $totalPage, $dataOld);
+
+        echo "======END chotot=========<br/>";
         flush();
         ob_flush();
+    }
+
+    protected function execCurl($url, $param = array())
+    {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST , 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER , 0);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT ,0); 
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        $content = curl_exec($ch);
+        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if ($httpcode === 200) {
+            return $this->convertJson($content);
+        }
+        return null;
+    }
+
+    protected function convertJson($data)
+    {
+        return json_decode($data, true);
+    }
+
+    protected function getContentChoTot($page, $totalPage, $dataOld)
+    {
+        $oPost = ($totalPage * 20) - ($page * 20);
+
+        $max_loop = false;
+        echo 'Page: ' . $page . '<br/>';
+        flush();
+        ob_flush();
+
+        if ($page <= 0 || $page > $totalPage) {
+            return;
+        }
+
+        $url = sprintf(\config('wrap.url_site.chotot_gateway'), $page, 20, $oPost);
+        echo 'url: ' . $url . "<br/>";
+        flush();
+        ob_flush();
+
+        $data = array();
+        $contents = $this->execCurl($url);
+        if ($contents === null) {
+            echo 'Item empty <br/>';
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
+            echo '=========================================================================<br/>';
+            flush();
+            ob_flush();
+
+            unset($contents);
+        } else {
+            $items = $contents['ads'];
+            unset($contents);
+
+            $pdo = DB::connection()->getPdo();
+            $domain = \config('wrap.url_site.chotot');
+
+            foreach ($items as $indexL => $item) {
+                $link = $this->formatLinkChoTot($domain, $item);
+
+                if ($this->type !== 'all') {
+                    $count = Contents::where('type', 'chotot')->where('link', $link)->count();
+                    if (!empty($count)) {
+                        unset($count);
+                        $max_loop = true;
+                        continue;
+                    }
+                }
+                $title = isset($item['subject']) ? trim($item['subject']) : null;
+                $city = isset($item['region_name']) ? trim($item['region_name']) : null;
+                $price = isset($item['price_string']) ? trim($item['price_string']) : null;
+
+                $detailUrl = sprintf(\config('wrap.url_site.chotot_gateway_detail'), $item['list_id']);
+                $detail = $this->getDetailChoTot($detailUrl);
+                $shortContent = isset($detail['shortContent']) ? $detail['shortContent'] : null;
+                $phone = isset($detail['phone']) ? $detail['phone'] : null;
+                $contact = isset($detail['contact']) ? $detail['contact'] : null;
+                $productYear = isset($detail['productYear']) ? $detail['productYear'] : null;
+                $kmRun = isset($detail['kmRun']) ? $detail['kmRun'] : null;
+
+                $title = $pdo->quote($title);
+                $price = $pdo->quote($price);
+                $city = $pdo->quote($city);
+                $link = $pdo->quote($link);
+                $shortContent = $pdo->quote($shortContent);
+                $phone = $pdo->quote($phone);
+                $contact = $pdo->quote($contact);
+                $productYear = $pdo->quote($productYear);
+                $kmRun = $pdo->quote($kmRun);
+
+                $createdAt = date('Y-m-d H:i:s');
+                $data[] = "($link, $title, $price, $phone, $contact, $city, $productYear, $kmRun, $shortContent, 'chotot', \"$createdAt\")";
+            }
+            unset($items);
+            unset($pdo);
+
+            echo 'Data count: '. count($data) . '<br/>';
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
+            echo '=========================================================================<br/>';
+            flush();
+            ob_flush();
+
+            if (count($data)) {
+                $fields = array('link', 'brand_car', 'price', 'phone', 'contact', 'city', 'product_year', 'km_run', 'short_content', 'type', 'created_at');
+                $values = array(
+                    'link=VALUES(link)', 'brand_car=VALUES(brand_car)', 'price=VALUES(price)', 
+                    'phone=VALUES(phone)', 'contact=VALUES(contact)', 'city=VALUES(city)', 
+                    'product_year=VALUES(product_year)', 'km_run=VALUES(km_run)','short_content=VALUES(short_content)', 
+                    'type=VALUES(type)', 'created_at=VALUES(created_at)');
+                $this->inserOrUpdate($fields, $data, $values);
+                unset($data);
+            }
+        }
+
+        if ($max_loop && $page >= 2) {
+            unset($max_loop);
+            return;
+        }
+
+        if ($page > 0 || $page < $totalPage) {
+            if ($dataOld === NULL) {
+                $page--;
+            } else {
+                $page++;
+            }
+            $this->getContentChoTot($page, $totalPage, $dataOld);
+        }
+    }
+    protected function getDetailChoTot($url)
+    {
+        echo '======BEGIN detail chotot=========<br/>';
+        echo 'url: ' . $url . "<br/>";
+        flush();
+        ob_flush();
+
+        $data = $this->execCurl($url);
+        if ($data === null) {
+            return array();
+        }
+
+        echo "======END detail chotot=========<br/>";
+        flush();
+        ob_flush();
+        return array(
+            'shortContent' => isset($data['ad']['body']) ? $data['ad']['body'] : null,
+            'phone' => isset($data['ad']['phone']) ? $data['ad']['phone'] : null,
+            'contact' => isset($data['ad']['account_name']) ? $data['ad']['account_name'] : null,
+            'productYear' => isset($data['ad_params']['mfDate']['value']) ? $data['ad_params']['mfDate']['value'] : null,
+            'kmRun' => isset($data['ad_params']['mileage']['value']) ? $data['ad_params']['mileage']['value'] : null,
+        );
+    }
+    
+    protected function formatLinkChoTot($url, $item)
+    {
+        $district = $this->vnStrFilter($item['area_name']);
+        $subject = $this->vnStrFilter($item['subject']);
+        $productId = $item['list_id'];
+
+        $link = $url . $district . '/mua-ban-o-to/' . $subject . '-' . $productId . '.htm';
+        return $link;
+    }
+    
+    function vnStrFilter ($str) {
+        $unicode = array(
+            'a'=>'á|à|ả|ã|ạ|ă|ắ|ặ|ằ|ẳ|ẵ|â|ấ|ầ|ẩ|ẫ|ậ',
+            'd'=>'đ',
+            'e'=>'é|è|ẻ|ẽ|ẹ|ê|ế|ề|ể|ễ|ệ',
+            'i'=>'í|ì|ỉ|ĩ|ị',
+            'o'=>'ó|ò|ỏ|õ|ọ|ô|ố|ồ|ổ|ỗ|ộ|ơ|ớ|ờ|ở|ỡ|ợ',
+            'u'=>'ú|ù|ủ|ũ|ụ|ư|ứ|ừ|ử|ữ|ự',
+            'y'=>'ý|ỳ|ỷ|ỹ|ỵ',
+            'A'=>'Á|À|Ả|Ã|Ạ|Ă|Ắ|Ặ|Ằ|Ẳ|Ẵ|Â|Ấ|Ầ|Ẩ|Ẫ|Ậ',
+            'D'=>'Đ',
+            'E'=>'É|È|Ẻ|Ẽ|Ẹ|Ê|Ế|Ề|Ể|Ễ|Ệ',
+            'I'=>'Í|Ì|Ỉ|Ĩ|Ị',
+            'O'=>'Ó|Ò|Ỏ|Õ|Ọ|Ô|Ố|Ồ|Ổ|Ỗ|Ộ|Ơ|Ớ|Ờ|Ở|Ỡ|Ợ',
+            'U'=>'Ú|Ù|Ủ|Ũ|Ụ|Ư|Ứ|Ừ|Ử|Ữ|Ự',
+            'Y'=>'Ý|Ỳ|Ỷ|Ỹ|Ỵ',
+        );
+
+       foreach($unicode as $nonUnicode=>$uni){
+            $str = preg_replace("/($uni)/i", $nonUnicode, $str);
+       }
+       $str = str_replace(' ', '-', strtolower($str));
+       $str = str_replace(',', '-', strtolower($str));
+       $str = preg_replace('/[^A-Za-z0-9\-]/', '', $str);
+       return $str;
     }
 
     protected function getMuaBan($page = 1, $limit = 20)
@@ -2170,7 +2342,7 @@ class BaseController extends Controller
         $html = $this->loopFetchUrl($urlPaging);
         $items = null;
         if (is_object($html)) {
-            $items = @$html->find('.stm-isotope-sorting .stm-listing-no-price-labels');
+            $items = @$html->find('#listings-result .stm-isotope-sorting');
         }
 
         $data = array();
@@ -2189,48 +2361,67 @@ class BaseController extends Controller
             $pdo = DB::connection()->getPdo();
 
             foreach ($items as $indexL => $item) {
-
-                $link = @$item->find('.title a', 0)->href;
-                if ($this->type !== 'all') {
-                    $count = Contents::where('type', 'oto_thien')->where('link', $link)->count();
-                    if (!empty($count)) {
-//                        $page = -1;
-                        unset($count);
-                        $max_loop = true;
-                        $items[$indexL]->clear();
-                        continue;
-//                        break;
-                    }
+                $childs = $item->find('.listing-list-loop');
+                if (!$childs) {
+                    unset($childs);
+                    continue;
                 }
+                foreach ($childs as $indexX => $info) {
 
-                $price = @$item->find('.meta-top .normal-price', 0)->plaintext;
-                $title = @$item->find('.title a', 0)->plaintext;
+                    $link = $info->find('.content .title a', 0)->href;
+                    echo $link . '<br/>';
+                    flush();
+                    ob_flush();
 
-                $kmRun  = @$item->find('.meta-middle-row', 0)->find('.mileage .value', 0)->plaintext;
-                $productYear  = @$item->find('.meta-middle-row', 0)->find('.ca-year .value', 0)->plaintext;
-
-                $temps = @$item->find('.meta-bottom .car-action-dealer-info', 0);
-
-                $contact = $phone = null;
-                if(is_object($temps)) {
-                    $contact = $temps->find('.dealer-info-block .title a', 0)->plaintext;
-                    $phoneObj = $temps->find('.dealer-information .phone', 0);
-                    if (is_object($phoneObj)) {
-                        $phone = $phoneObj->plaintext;
+                    if ($this->type !== 'all') {
+                        $count = Contents::where('type', 'oto_thien')->where('link', $link)->count();
+                        if (!empty($count)) {
+                            unset($count);
+                            $max_loop = true;
+                            $childs[$indexX]->clear();
+                            continue;
+                        }
                     }
+                    $price = $info->find('.meta-top .normal-price', 0)->plaintext;
+                    $title = $info->find('.title a', 0)->plaintext;
+
+                    $kmRun = $productYear = null;
+                    $row = $info->find('.meta-middle-row', 0);
+                    if ($row) {
+                        if ($row->find('.mileage .value', 0)) {
+                            $kmRun = $row->find('.mileage .value', 0)->plaintext;
+                        }
+                        if ($row->find('.ca-year .value', 0)) {
+                            $productYear = $row->find('.ca-year .value', 0)->plaintext;
+                        }
+                    }
+                    unset($row);
+
+                    $temps = $info->find('.meta-bottom .car-action-dealer-info', 0);
+                    $contact = $phone = null;
+                    if(is_object($temps)) {
+                        $contact = $temps->find('.dealer-info-block .title a', 0)->plaintext;
+                        $phoneObj = $temps->find('.dealer-information .phone', 0);
+                        if (is_object($phoneObj)) {
+                            $phone = $phoneObj->plaintext;
+                            unset($phoneObj);
+                        }
+                    }
+                    unset($temps);
+
+                    $title = $pdo->quote($title);
+                    $link = $pdo->quote($link);
+                    $price = $pdo->quote($price);
+                    $kmRun = $pdo->quote($kmRun);
+                    $productYear = $pdo->quote($productYear);
+                    $phone = $pdo->quote($phone);
+                    $contact = $pdo->quote($contact);
+
+                    $createdAt = date('Y-m-d H:i:s');
+                    $data[] = "($link, $title, $price, $phone, $kmRun, $productYear, $contact, 'oto_thien', \"$createdAt\")";
+                    $childs[$indexX]->clear();
                 }
-
-                $title = $pdo->quote($title);
-                $link = $pdo->quote($link);
-                $price = $pdo->quote($price);
-                $kmRun = $pdo->quote($kmRun);
-                $productYear = $pdo->quote($productYear);
-                $phone = $pdo->quote($phone);
-                $contact = $pdo->quote($contact);
-
-                $createdAt = date('Y-m-d H:i:s');
-                $data[] = "($link, $title, $price, $phone, $kmRun, $productYear, $contact, 'oto_thien', \"$createdAt\")";
-
+                unset($childs);
                 $items[$indexL]->clear();
             }
             unset($items);
