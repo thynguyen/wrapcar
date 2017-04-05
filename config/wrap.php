@@ -14,6 +14,8 @@ return [
         'bonbanh' => 'http://www.bonbanh.com/',
         'muaban'  => 'https://muaban.net/',
         'chotot'  => 'https://xe.chotot.com/',
+        'chotot_gateway' => 'https://gateway.chotot.com/v1/public/ad-listing?region=&cg=2010&page=%d&sp=0&limit=%d&o=%s&st=s,k',
+        'chotot_gateway_detail' => 'https://gateway.chotot.com/v1/public/ad-listing/%s',
         'otovietnam'  => 'https://www.otovietnam.com/',
         'carmudi' => 'https://www.carmudi.vn/',
         'banxehoi' => 'http://banxehoi.com/',
