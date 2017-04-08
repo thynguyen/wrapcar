@@ -12,6 +12,7 @@ class BaseController extends Controller
 {
     public $type = null;
     public $step_fail = 0;
+    public $empty_count = 0;
 
     public function __construct(Request $request) {
         $this->type = $request->get('type');
@@ -238,7 +239,11 @@ class BaseController extends Controller
     
     protected function formatLinkChoTot($url, $item)
     {
-        $district = $this->vnStrFilter($item['area_name']);
+        if (isset($item['area_name'])) {
+            $district = $this->vnStrFilter($item['area_name']);
+        } else {
+            $district = $this->vnStrFilter($item['region_name']);
+        } 
         $subject = $this->vnStrFilter($item['subject']);
         $productId = $item['list_id'];
 
@@ -407,7 +412,15 @@ class BaseController extends Controller
         $url = \config('wrap.url_site.choxe');
 
         $html = HtmlDomParser::file_get_html($url . 'oto/?page=1');
-        $totalPage = $html->find('.pagination li', 6)->plaintext;
+        $li = $html->find('.pagination li', 4);
+        if (is_object($li)) {
+            $a = $li->find('a', 0);
+            if (is_object($a)) {
+                $href = $a->href;
+                preg_match('!\d+!', $href, $matches);
+                $totalPage = isset($matches[0]) ? $matches[0] : 0;
+            }
+        }
         unset($html);
 
         if ($dataOld === NULL) {
@@ -415,7 +428,7 @@ class BaseController extends Controller
         }
         $this->getContentChoXe($page, $totalPage, $dataOld);
 
-        echo "======END BANXEHOI=========<br/>";
+        echo "======END CHOXE=========<br/>";
         flush();
         ob_flush();
     }
@@ -1310,7 +1323,7 @@ class BaseController extends Controller
     protected function getContentChoXe($page, $totalPage, $dataOld)
     {
         $max_loop = false;
-        if ($page <= 0 || empty($page) || $page > $totalPage) {
+        if ($page <= 0 || empty($page) || $page > $totalPage || $this->empty_count > 2) {
             return;
         }
         echo 'Page: ' . $page . '<br/>';
@@ -1322,11 +1335,12 @@ class BaseController extends Controller
         $html = $this->loopFetchUrl($url);
         $items = null;
         if (is_object($html)) {
-            $items = @$html->find('.homeTopCars ul li');
+            $items = @$html->find('table.list-news tr');
         }
 
         $data = array();
         if (!$items) {
+            $this->empty_count ++;
             echo 'Item empty <br/>';
             echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
             echo '=========================================================================<br/>';
@@ -1339,48 +1353,43 @@ class BaseController extends Controller
             unset($html);
 
             $pdo = DB::connection()->getPdo();
-            $domain = \config('wrap.url_site.choxe');
-            $domain = substr($domain, 0, -1);
 
             foreach ($items as $indexL => $item) {
-                $link = trim(@$item->find('.info-car h2 a', 0)->href);
+                $link = trim(@$item->find('.info-left a.img', 0)->href);
                 if ($this->type !== 'all') {
-                    $count = Contents::where('type', 'cho_xe')->where('link', $domain . $link)->count();
+                    $count = Contents::where('type', 'cho_xe')->where('link', $link)->count();
                     if (!empty($count)) {
-//                        $page = -1;
                         $max_loop = true;
                         unset($count);
                         $items[$indexL]->clear();
                         continue;
-//                        break;
                     }
                 }
 
-                $title = trim(@$item->find('.info-car h2 a', 0)->plaintext); // brand car
-                $price = trim(@$item->find('.info-car .pricenew', 0)->plaintext);
-                $city = trim(@$item->find('.detailinfo .madein', 0)->plaintext);
-                $phone = trim(@$item->find('.info-car .call-horizontal', 0)->plaintext);
-                $productYear = trim(@$item->find('.detailinfo .year', 0)->plaintext);
-                $shortContent = trim(@$item->find('.info-car', 0)->innertext());
+                $title = trim(@$item->find('.info-left .tit-news', 0)->plaintext); // brand car
+                $price = trim(@$item->find('.info-left .price', 0)->plaintext);
+                $city = trim(@$item->find('.info-left .city', 0)->plaintext);
 
                 // Get Phone number detail
-                /*
-                $shortContent = null;
-                if (!empty($link)) {
-                    $temps = $this->getDetailChoXe($domain . $link);
-                    $shortContent = isset($temps['shortContent']) ? $temps['shortContent'] : null;
-                }*/
+                $temps = $this->getDetailChoXe($link);
+                $shortContent = isset($temps['shortContent']) ? $temps['shortContent'] : null;
+                $kmRun = isset($temps['kmRun']) ? $temps['kmRun'] : null;
+                $productYear = isset($temps['productYear']) ? $temps['productYear'] : null;
+                $color = isset($temps['color']) ? $temps['color'] : null;
+                $phone = isset($temps['phone']) ? $temps['phone'] : null;
 
                 $title = $pdo->quote($title);
-                $link = $pdo->quote($domain . $link);
+                $link = $pdo->quote($link);
                 $price = $pdo->quote($price);
+                $kmRun = $pdo->quote($kmRun);
                 $city = $pdo->quote($city);
+                $color = $pdo->quote($color);
                 $phone = $pdo->quote($phone);
                 $productYear = $pdo->quote($productYear);
                 $shortContent = $pdo->quote($shortContent);
 
                 $createdAt = date('Y-m-d H:i:s');
-                $data[] = "($link, $title, $price, $phone, $city, $productYear, $shortContent, 'cho_xe', \"$createdAt\")";
+                $data[] = "($link, $title, $price, $phone, $city, $productYear, $kmRun, $color, $shortContent, 'cho_xe', \"$createdAt\")";
 
                 $items[$indexL]->clear();
             }
@@ -1393,10 +1402,10 @@ class BaseController extends Controller
             ob_flush();
 
             if (count($data)) {
-                $fields = array('link', 'brand_car', 'price', 'phone', 'city', 'product_year', 'short_content', 'type', 'created_at');
+                $fields = array('link', 'brand_car', 'price', 'phone', 'city', 'product_year', 'km_run', 'color', 'short_content', 'type', 'created_at');
                 $values = array(
                     'link=VALUES(link)', 'brand_car=VALUES(brand_car)', 'price=VALUES(price)', 'phone=VALUES(phone)', 'city=VALUES(city)', 
-                    'product_year=VALUES(product_year)', 'short_content=VALUES(short_content)', 'type=VALUES(type)', 'created_at=VALUES(created_at)');
+                    'product_year=VALUES(product_year)', 'km_run=VALUES(km_run)', 'color=VALUES(color)', 'short_content=VALUES(short_content)', 'type=VALUES(type)', 'created_at=VALUES(created_at)');
                 $this->inserOrUpdate($fields, $data, $values);
 
                 unset($data);
@@ -2979,30 +2988,66 @@ class BaseController extends Controller
 
     protected function getDetailChoXe($url)
     {
+        $results = array();
+
         $html = $this->loopFetchUrl($url);
-        $items = null;
-        if (is_object($html)) {
-            $items = @$html->find('#detailSection .infoSection', 0);
+        if (!is_object($html)) {
+            unset($html);
+            return array();
         }
 
-        if (!$items) {
-            echo 'Item empty <br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
-            flush();
-            ob_flush();
-            return null;
+        echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
+        echo '=========================================================================<br/>';
+        flush();
+        ob_flush();
 
-            unset($html);
-            unset($items);
-        } else {
-            $results = array();
-            $results['shortContent'] = trim(@$html->find('.body-description-car', 0)->innertext());
-
-            unset($html);
-
-            return $results;
+        $kmRunT = $html->find('.detail-xe', 1);
+        if (is_object($kmRunT)) {
+            $kmRun = $kmRunT->find('b', 0);
+            if (is_object($kmRun)) {
+                $results['kmRun'] = $kmRun->plaintext;
+            }
+            unset($kmRun);
         }
+        $productYearT = $html->find('.detail-xe', 6);
+        if (is_object($productYearT)) {
+            $productYear = $productYearT->find('b', 0);
+            if (is_object($productYear)) {
+                $results['productYear'] = $productYear->plaintext;
+            }
+            unset($productYear);
+        }
+        $colorT = $html->find('.detail-xe', 8);
+        if (is_object($colorT)) {
+            $color = $colorT->find('b', 0);
+            if (is_object($color)) {
+                $results['color'] = $color->plaintext;
+            }
+            unset($color);
+        }
+        $shortContent = $html->find('.mo-ta', 0);
+        if (is_object($shortContent)) {
+            $results['shortContent'] = $shortContent->innertext();
+        }
+        $info = $html->find('.box-info-nban', 0);
+        if (is_object($info)) {
+            $a = $info->find('.btn-orange-48', 0);
+            if ($a) {
+                $attr = $a->href;
+                $results['phone'] = str_replace('tel:', '', $attr);
+                unset($attr);
+            }
+            unset($a);
+        }
+
+        unset($kmRunT);
+        unset($productYear);
+        unset($color);
+        unset($shortContent);
+        unset($info);
+        unset($html);
+
+        return $results;
     }
 
     protected function getDetailXe360($url)
