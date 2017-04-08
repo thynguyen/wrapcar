@@ -22,7 +22,7 @@ class BaseController extends Controller
     {
         $dataOld = Contents::where('type', 'bon_banh')->orderBy('id', 'DESC')->first();
 
-        echo '======BEGIN bonbanh=========<br/>';
+        echo "======BEGIN bonbanh=========\n<br/>";
         flush();
         ob_flush();
 
@@ -47,7 +47,7 @@ class BaseController extends Controller
         }
         $this->getContentBonBanh($page, $totalPage, $dataOld);
 
-        echo "======END bonbanh=========<br/>";
+        echo "======END bonbanh=========\n<br/>";
         flush();
         ob_flush();
     }
@@ -56,7 +56,7 @@ class BaseController extends Controller
     {
         $dataOld = Contents::where('type', 'chotot')->orderBy('id', 'DESC')->first();
 
-        echo '======BEGIN chotot=========<br/>';
+        echo "======BEGIN chotot=========\n<br/>";
         flush();
         ob_flush();
 
@@ -78,7 +78,7 @@ class BaseController extends Controller
 
         $this->getContentChotot($page, $totalPage, $dataOld);
 
-        echo "======END chotot=========<br/>";
+        echo "======END chotot=========\n<br/>";
         flush();
         ob_flush();
     }
@@ -112,7 +112,7 @@ class BaseController extends Controller
         $oPost = ($totalPage * 20) - ($page * 20);
 
         $max_loop = false;
-        echo 'Page: ' . $page . '<br/>';
+        echo 'Page: ' . $page . "\n\<br/>";
         flush();
         ob_flush();
 
@@ -128,9 +128,9 @@ class BaseController extends Controller
         $data = array();
         $contents = $this->execCurl($url);
         if ($contents === null) {
-            echo 'Item empty <br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo "Item empty \n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo "=========================================================================\n<br/>";
             flush();
             ob_flush();
 
@@ -181,9 +181,9 @@ class BaseController extends Controller
             unset($items);
             unset($pdo);
 
-            echo 'Data count: '. count($data) . '<br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Data count: '. count($data) . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -215,8 +215,8 @@ class BaseController extends Controller
     }
     protected function getDetailChoTot($url)
     {
-        echo '======BEGIN detail chotot=========<br/>';
-        echo 'url: ' . $url . "<br/>";
+        echo "======BEGIN detail chotot=========\n<br/>";
+        echo 'url: ' . $url . "\n<br/>";
         flush();
         ob_flush();
 
@@ -225,7 +225,7 @@ class BaseController extends Controller
             return array();
         }
 
-        echo "======END detail chotot=========<br/>";
+        echo "======END detail chotot=========\n<br/>";
         flush();
         ob_flush();
         return array(
@@ -282,7 +282,7 @@ class BaseController extends Controller
     {
         $dataOld = Contents::where('type', 'mua_ban')->orderBy('id', 'DESC')->first();
 
-        echo '======BEGIN muaban=========<br/>';
+        echo "======BEGIN muaban=========\n<br/>";
         flush();
         ob_flush();
 
@@ -294,7 +294,7 @@ class BaseController extends Controller
         }
         $this->getContentMuaBan($page, $totalPage, $dataOld);
 
-        echo "======END muaban=========<br/>";
+        echo "======END muaban=========\n<br/>";
         flush();
         ob_flush();
     }
@@ -303,7 +303,7 @@ class BaseController extends Controller
     {
         $dataOld = Contents::where('type', 'otovietnam')->orderBy('id', 'DESC')->first();
 
-        echo '======BEGIN OTO VIET NAM=========<br/>';
+        echo "======BEGIN OTO VIET NAM=========\n<br/>";
         flush();
         ob_flush();
 
@@ -321,7 +321,7 @@ class BaseController extends Controller
         }
         $this->getContentOtoVietNam($page, $totalPage, $dataOld, $type);
 
-        echo "======END OTO VIET NAM=========<br/>";
+        echo "======END OTO VIET NAM=========\n<br/>";
         flush();
         ob_flush();
     }
@@ -329,7 +329,7 @@ class BaseController extends Controller
     protected function getCarmundi($page = 1, $limit = 20)
     {
         $dataOld = Contents::where('type', 'carmudi')->orderBy('id', 'DESC')->first();
-        echo '======BEGIN CARMUDI=========<br/>';
+        echo '======BEGIN CARMUDI=========' . "\n<br/>";
         flush();
         ob_flush();
 
@@ -363,7 +363,7 @@ class BaseController extends Controller
         }
         $this->getContentCarmudi($page, $totalPage, $dataOld);
 
-        echo "======END CARMUDI=========<br/>";
+        echo "======END CARMUDI=========\n<br/>";
         flush();
         ob_flush();
     }
@@ -372,7 +372,7 @@ class BaseController extends Controller
     {
         $dataOld = Contents::where('type', 'ban_xe_hoi')->orderBy('id', 'DESC')->first();
 
-        echo '======BEGIN BANXEHOI=========<br/>';
+        echo "======BEGIN BANXEHOI=========\n<br/>";
         flush();
         ob_flush();
 
@@ -394,7 +394,7 @@ class BaseController extends Controller
         }
         $this->getContentBanXeHoi($page, $totalPage, $dataOld);
 
-        echo "======END BANXEHOI=========<br/>";
+        echo "======END BANXEHOI=========\n<br/>";
         flush();
         ob_flush();
     }
@@ -403,7 +403,7 @@ class BaseController extends Controller
     {
         $dataOld = Contents::where('type', 'cho_xe')->orderBy('id', 'DESC')->first();
 
-        echo '======BEGIN CHOXE=========<br/>';
+        echo "======BEGIN CHOXE=========\n<br/>";
         flush();
         ob_flush();
 
@@ -428,7 +428,7 @@ class BaseController extends Controller
         }
         $this->getContentChoXe($page, $totalPage, $dataOld);
 
-        echo "======END CHOXE=========<br/>";
+        echo "======END CHOXE=========\n<br/>";
         flush();
         ob_flush();
     }
@@ -437,7 +437,7 @@ class BaseController extends Controller
     {
         $dataOld = Contents::where('type', 'xe_360')->orderBy('id', 'DESC')->first();
 
-        echo '======BEGIN XE 360=========<br/>';
+        echo "======BEGIN XE 360=========\n<br/>";
         flush();
         ob_flush();
 
@@ -449,7 +449,7 @@ class BaseController extends Controller
         }
         $this->getContentXe360($page, $totalPage, $dataOld);
 
-        echo "======END XE 360=========<br/>";
+        echo "======END XE 360=========\n<br/>";
         flush();
         ob_flush();
     }
@@ -458,7 +458,7 @@ class BaseController extends Controller
     {
         $dataOld = Contents::where('type', 'xe_5giay')->orderBy('id', 'DESC')->first();
 
-        echo '======BEGIN XE5GIAY=========<br/>';
+        echo "======BEGIN XE5GIAY=========\n<br/>";
         flush();
         ob_flush();
 
@@ -480,7 +480,7 @@ class BaseController extends Controller
         }
         $this->getContentXe5Giay($page, $totalPage, $dataOld);
 
-        echo "======END XE5GIAY=========<br/>";
+        echo "======END XE5GIAY=========\n<br/>";
         flush();
         ob_flush();
     }
@@ -489,7 +489,7 @@ class BaseController extends Controller
     {
         $dataOld = Contents::where('type', 'san_oto')->orderBy('id', 'DESC')->first();
 
-        echo '======BEGIN SANOTO=========<br/>';
+        echo "======BEGIN SANOTO=========\n<br/>";
         flush();
         ob_flush();
 
@@ -507,7 +507,7 @@ class BaseController extends Controller
         }
         $this->getContentSanOtoVn($page, $totalPage, $dataOld);
 
-        echo "======END SANOTO=========<br/>";
+        echo "======END SANOTO=========\n<br/>";
         flush();
         ob_flush();
     }
@@ -516,7 +516,7 @@ class BaseController extends Controller
     {
         $dataOld = Contents::where('type', 'muaban_oto')->orderBy('id', 'DESC')->first();
 
-        echo '======BEGIN MUABAN OTO=========<br/>';
+        echo "======BEGIN MUABAN OTO=========\n<br/>";
         flush();
         ob_flush();
 
@@ -528,7 +528,7 @@ class BaseController extends Controller
         }
         $this->getContentMuaBanOto($page, $totalPage, $dataOld);
 
-        echo "======END MUABAN OTO=========<br/>";
+        echo "======END MUABAN OTO=========\n<br/>";
         flush();
         ob_flush();
     }
@@ -537,7 +537,7 @@ class BaseController extends Controller
     {
         $dataOld = Contents::where('type', 'muaban_nhanh')->orderBy('id', 'DESC')->first();
 
-        echo '======BEGIN MUABAN NHANH=========<br/>';
+        echo "======BEGIN MUABAN NHANH=========\n<br/>";
         flush();
         ob_flush();
 
@@ -555,7 +555,7 @@ class BaseController extends Controller
         }
         $this->getContentMuaBanNhanh($page, $totalPage, $dataOld);
 
-        echo "======END MUABAN NHANH=========<br/>";
+        echo "======END MUABAN NHANH=========\n<br/>";
         flush();
         ob_flush();
     }
@@ -564,7 +564,7 @@ class BaseController extends Controller
     {
         $dataOld = Contents::where('type', 'rong_bay')->orderBy('id', 'DESC')->first();
 
-        echo '======BEGIN RONG BAY=========<br/>';
+        echo "======BEGIN RONG BAY=========\n<br/>";
         flush();
         ob_flush();
 
@@ -576,7 +576,7 @@ class BaseController extends Controller
         }
         $this->getContentRongBay($page, $totalPage, $dataOld);
 
-        echo "======END RONG BAY=========<br/>";
+        echo "======END RONG BAY=========\n<br/>";
         flush();
         ob_flush();
     }
@@ -585,7 +585,7 @@ class BaseController extends Controller
     {
         $dataOld = Contents::where('type', 'en_bac')->orderBy('id', 'DESC')->first();
 
-        echo '======BEGIN ENBAC=========<br/>';
+        echo "======BEGIN ENBAC=========\n<br/>";
         flush();
         ob_flush();
 
@@ -597,7 +597,7 @@ class BaseController extends Controller
         }
         $this->getContentEnBac($page, $totalPage, $dataOld);
 
-        echo "======END ENBAC=========<br/>";
+        echo "======END ENBAC=========\n<br/>";
         flush();
         ob_flush();
     }
@@ -606,7 +606,7 @@ class BaseController extends Controller
     {
         $dataOld = Contents::where('type', 'thegioixe_oto')->orderBy('id', 'DESC')->first();
 
-        echo '======BEGIN THEGIOIXEOTO=========<br/>';
+        echo "======BEGIN THEGIOIXEOTO=========\n<br/>";
         flush();
         ob_flush();
 
@@ -627,7 +627,7 @@ class BaseController extends Controller
         }
         $this->getContentTheGioiXeOto($page, $totalPage, $dataOld);
 
-        echo "======END THEGIOIXEOTO=========<br/>";
+        echo "======END THEGIOIXEOTO=========\n<br/>";
         flush();
         ob_flush();
     }
@@ -636,7 +636,7 @@ class BaseController extends Controller
     {
         $dataOld = Contents::where('type', 'oto_thien')->orderBy('id', 'DESC')->first();
 
-        echo '======BEGIN OTOTHIEN=========<br/>';
+        echo "======BEGIN OTOTHIEN=========\n<br/>";
         flush();
         ob_flush();
 
@@ -653,7 +653,7 @@ class BaseController extends Controller
         }
         $this->getContentOtoThien($page, $totalPage, $dataOld);
 
-        echo "======END OTOTHIEN=========<br/>";
+        echo "======END OTOTHIEN=========\n<br/>";
         flush();
         ob_flush();
     }
@@ -662,7 +662,7 @@ class BaseController extends Controller
     {
         $dataOld = Contents::where('type', 'cafe_auto')->orderBy('id', 'DESC')->first();
 
-        echo '======BEGIN CAFE AUTO=========<br/>';
+        echo "======BEGIN CAFE AUTO=========\n<br/>";
         flush();
         ob_flush();
 
@@ -681,7 +681,7 @@ class BaseController extends Controller
         }
         $this->getContentCafeAuto($page, $totalPage, $dataOld);
 
-        echo "======END CAFE AUTO=========<br/>";
+        echo "======END CAFE AUTO=========\n<br/>";
         flush();
         ob_flush();
     }
@@ -690,7 +690,7 @@ class BaseController extends Controller
     {
         $dataOld = Contents::where('type', 'banotore')->orderBy('id', 'DESC')->first();
 
-        echo '======BEGIN BAN OTO RE========<br/>';
+        echo "======BEGIN BAN OTO RE========\n<br/>";
         flush();
         ob_flush();
 
@@ -711,7 +711,7 @@ class BaseController extends Controller
         }
         $this->getContentBanOtoRe($page, $totalPage, $dataOld);
 
-        echo "======END BAN OTO RE=========<br/>";
+        echo "======END BAN OTO RE=========\n<br/>";
         flush();
         ob_flush();
     }
@@ -720,7 +720,7 @@ class BaseController extends Controller
     {
         $dataOld = Contents::where('type', 'sanxehot')->orderBy('id', 'DESC')->first();
 
-        echo '======BEGIN SAN XE HOT========<br/>';
+        echo "======BEGIN SAN XE HOT========\n<br/>";
         flush();
         ob_flush();
 
@@ -732,7 +732,7 @@ class BaseController extends Controller
         }
         $this->getContentSanXeHot($page, $totalPage, $dataOld);
 
-        echo "======END SAN XE HOT=========<br/>";
+        echo "======END SAN XE HOT=========\n<br/>";
         flush();
         ob_flush();
     }
@@ -753,7 +753,7 @@ class BaseController extends Controller
     protected function getContentBonBanh($page, $totalPage, $dataOld)
     {
         $max_loop = false;
-        echo 'Page: ' . $page . '<br/>';
+        echo 'Page: ' . $page . "\n<br/>";
         flush();
         ob_flush();
 
@@ -769,9 +769,9 @@ class BaseController extends Controller
         }
         $data = array();
         if (!$items) {
-            echo 'Item empty <br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo "Item empty \n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo "=========================================================================\n<br/>";
             flush();
             ob_flush();
 
@@ -828,9 +828,9 @@ class BaseController extends Controller
             unset($items);
             unset($pdo);
 
-            echo 'Data count: '. count($data) . '<br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Data count: '. count($data) . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo "=========================================================================\n<br/>";
             flush();
             ob_flush();
 
@@ -863,7 +863,7 @@ class BaseController extends Controller
     protected function getContentMuaBan($page, $totalPage, $dataOld)
     {
         $max_loop = false;
-        echo 'Page: ' . $page . '<br/>';
+        echo 'Page: ' . $page . "\n<br/>";
         flush();
         ob_flush();
 
@@ -881,9 +881,9 @@ class BaseController extends Controller
 
         $data = array();
         if (!$items) {
-            echo 'Item empty <br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Item empty ' . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '========================================================================='."\n<br/>";
             flush();
             ob_flush();
 
@@ -941,9 +941,9 @@ class BaseController extends Controller
             }
             unset($items);
 
-            echo 'Data count: '. count($data) . '<br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Data count: '. count($data) . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -978,7 +978,7 @@ class BaseController extends Controller
     protected function getContentOtoVietNam($page, $totalPage, $dataOld, $type)
     {
         $max_loop = false;
-        echo 'Page: ' . $page . '<br/>';
+        echo 'Page: ' . $page . "\n<br/>";
         flush();
         ob_flush();
 
@@ -995,9 +995,9 @@ class BaseController extends Controller
 
         $data = array();
         if (!$items) {
-            echo 'Item empty <br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Item empty ' . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -1063,9 +1063,9 @@ class BaseController extends Controller
             }
             unset($items);
 
-            echo 'Data count: '. count($data) . '<br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Data count: '. count($data) . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -1099,7 +1099,7 @@ class BaseController extends Controller
     protected function getContentCarmudi($page, $totalPage, $dataOld)
     {
         $max_loop = false;
-        echo 'Page: ' . $page . '<br/>';
+        echo 'Page: ' . $page . "\n<br/>";
         flush();
         ob_flush();
 
@@ -1117,9 +1117,9 @@ class BaseController extends Controller
 
         $data = array();
         if (!$items) {
-            echo 'Item empty <br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Item empty ' . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -1175,9 +1175,9 @@ class BaseController extends Controller
             }
             unset($items);
 
-            echo 'Data count: '. count($data) . '<br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Data count: '. count($data) . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -1210,7 +1210,7 @@ class BaseController extends Controller
     protected function getContentBanXeHoi($page, $totalPage, $dataOld)
     {
         $max_loop = false;
-        echo 'Page: ' . $page . '<br/>';
+        echo 'Page: ' . $page . "\n<br/>";
         flush();
         ob_flush();
         if ($page <= 0 || $page > $totalPage) {
@@ -1226,9 +1226,9 @@ class BaseController extends Controller
         }
         $data = array();
         if (!$items) {
-            echo 'Item empty <br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Item empty ' . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -1289,9 +1289,9 @@ class BaseController extends Controller
             }
             unset($items);
 
-            echo 'Data count: '. count($data) . '<br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Data count: '. count($data) . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -1326,7 +1326,7 @@ class BaseController extends Controller
         if ($page <= 0 || empty($page) || $page > $totalPage || $this->empty_count > 2) {
             return;
         }
-        echo 'Page: ' . $page . '<br/>';
+        echo 'Page: ' . $page . "\n<br/>";
         flush();
         ob_flush();
 
@@ -1341,9 +1341,9 @@ class BaseController extends Controller
         $data = array();
         if (!$items) {
             $this->empty_count ++;
-            echo 'Item empty <br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Item empty ' . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -1395,9 +1395,9 @@ class BaseController extends Controller
             }
             unset($items);
 
-            echo 'Data count: '. count($data) . '<br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Data count: '. count($data) . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -1433,7 +1433,7 @@ class BaseController extends Controller
         if ($page <= 0 || empty($page) || $page > $totalPage) {
             return;
         }
-        echo 'Page: ' . $page . '<br/>';
+        echo 'Page: ' . $page . "\n<br/>";
         flush();
         ob_flush();
 
@@ -1447,9 +1447,9 @@ class BaseController extends Controller
 
         $data = array();
         if (!$items) {
-            echo 'Item empty <br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Item empty ' . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -1521,9 +1521,9 @@ class BaseController extends Controller
             }
             unset($items);
 
-            echo 'Data count: '. count($data) . '<br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Data count: '. count($data) . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -1559,7 +1559,7 @@ class BaseController extends Controller
         if ($page <= 0 || empty($page) || $page > $totalPage) {
             return;
         }
-        echo 'Page: ' . $page . '<br/>';
+        echo 'Page: ' . $page . "\n<br/>";
         flush();
         ob_flush();
 
@@ -1573,9 +1573,9 @@ class BaseController extends Controller
 
         $data = array();
         if (!$items) {
-            echo 'Item empty <br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Item empty ' . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -1625,9 +1625,9 @@ class BaseController extends Controller
             }
             unset($items);
 
-            echo 'Data count: '. count($data) . '<br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Data count: '. count($data) . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -1662,7 +1662,7 @@ class BaseController extends Controller
         if ($page <= 0 || empty($page) || $page > $totalPage) {
             return;
         }
-        echo 'Page: ' . $page . '<br/>';
+        echo 'Page: ' . $page . "\n<br/>";
         flush();
         ob_flush();
 
@@ -1676,9 +1676,9 @@ class BaseController extends Controller
 
         $data = array();
         if (!$items) {
-            echo 'Item empty <br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Item empty ' . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -1741,9 +1741,9 @@ class BaseController extends Controller
             }
             unset($items);
 
-            echo 'Data count: '. count($data) . '<br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Data count: '. count($data) . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -1780,7 +1780,7 @@ class BaseController extends Controller
         if ($page <= 0 || empty($page) || $page > $totalPage) {
             return;
         }
-        echo 'Page: ' . $page . '<br/>';
+        echo 'Page: ' . $page . "\n<br/>";
         flush();
         ob_flush();
 
@@ -1794,9 +1794,9 @@ class BaseController extends Controller
 
         $data = array();
         if (!$items) {
-            echo 'Item empty <br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Item empty ' . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -1862,9 +1862,9 @@ class BaseController extends Controller
             }
             unset($items);
 
-            echo 'Data count: '. count($data) . '<br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Data count: '. count($data) . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -1900,7 +1900,7 @@ class BaseController extends Controller
         if ($page <= 0 || empty($page) || $page > $totalPage) {
             return;
         }
-        echo 'Page: ' . $page . '<br/>';
+        echo 'Page: ' . $page . "\n<br/>";
         flush();
         ob_flush();
 
@@ -1914,9 +1914,9 @@ class BaseController extends Controller
 
         $data = array();
         if (!$items) {
-            echo 'Item empty <br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Item empty ' . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -1963,9 +1963,9 @@ class BaseController extends Controller
             }
             unset($items);
 
-            echo 'Data count: '. count($data) . '<br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Data count: '. count($data) . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -2001,7 +2001,7 @@ class BaseController extends Controller
         if ($page <= 0 || empty($page) || $page > $totalPage) {
             return;
         }
-        echo 'Page: ' . $page . '<br/>';
+        echo 'Page: ' . $page . "\n<br/>";
         flush();
         ob_flush();
 
@@ -2015,9 +2015,9 @@ class BaseController extends Controller
 
         $data = array();
         if (!$items) {
-            echo 'Item empty <br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Item empty ' . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -2073,9 +2073,9 @@ class BaseController extends Controller
             }
             unset($items);
 
-            echo 'Data count: '. count($data) . '<br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Data count: '. count($data) . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -2111,7 +2111,7 @@ class BaseController extends Controller
         if ($page <= 0 || empty($page) || $page > $totalPage) {
             return;
         }
-        echo 'Page: ' . $page . '<br/>';
+        echo 'Page: ' . $page . "\n<br/>";
         flush();
         ob_flush();
 
@@ -2125,9 +2125,9 @@ class BaseController extends Controller
 
         $data = array();
         if (!$items) {
-            echo 'Item empty <br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Item empty ' . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -2179,9 +2179,9 @@ class BaseController extends Controller
             }
             unset($items);
 
-            echo 'Data count: '. count($data) . '<br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Data count: '. count($data) . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -2218,7 +2218,7 @@ class BaseController extends Controller
         if ($page <= 0 || empty($page) || $page > $totalPage) {
             return;
         }
-        echo 'Page: ' . $page . '<br/>';
+        echo 'Page: ' . $page . "\n<br/>";
         flush();
         ob_flush();
 
@@ -2233,9 +2233,9 @@ class BaseController extends Controller
 
         $data = array();
         if (!$items) {
-            echo 'Item empty <br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Item empty ' . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -2300,9 +2300,9 @@ class BaseController extends Controller
             }
             unset($items);
 
-            echo 'Data count: '. count($data) . '<br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Data count: '. count($data) . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -2338,7 +2338,7 @@ class BaseController extends Controller
         if ($page <= 0 || empty($page) || $page > $totalPage) {
             return;
         }
-        echo 'Page: ' . $page . '<br/>';
+        echo 'Page: ' . $page . "\n<br/>";
         flush();
         ob_flush();
         if (empty($page)) {
@@ -2356,9 +2356,9 @@ class BaseController extends Controller
 
         $data = array();
         if (!$items) {
-            echo 'Item empty <br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Item empty ' . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -2378,7 +2378,7 @@ class BaseController extends Controller
                 foreach ($childs as $indexX => $info) {
 
                     $link = $info->find('.content .title a', 0)->href;
-                    echo $link . '<br/>';
+                    echo $link . "\n<br/>";
                     flush();
                     ob_flush();
 
@@ -2435,9 +2435,9 @@ class BaseController extends Controller
             }
             unset($items);
 
-            echo 'Data count: '. count($data) . '<br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Data count: '. count($data) . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -2474,7 +2474,7 @@ class BaseController extends Controller
         if ($page <= 0 || empty($page) || $page > $totalPage) {
             return;
         }
-        echo 'Page: ' . $page . '<br/>';
+        echo 'Page: ' . $page . "\n<br/>";
         flush();
         ob_flush();
         if (empty($page)) {
@@ -2492,9 +2492,9 @@ class BaseController extends Controller
 
         $data = array();
         if (!$items) {
-            echo 'Item empty <br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Item empty ' . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -2544,9 +2544,9 @@ class BaseController extends Controller
             }
             unset($items);
 
-            echo 'Data count: '. count($data) . '<br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Data count: '. count($data) . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -2583,7 +2583,7 @@ class BaseController extends Controller
         if ($page <= 0 || empty($page) || $page > $totalPage) {
             return;
         }
-        echo 'Page: ' . $page . '<br/>';
+        echo 'Page: ' . $page . "\n<br/>";
         flush();
         ob_flush();
         if (empty($page)) {
@@ -2601,9 +2601,9 @@ class BaseController extends Controller
 
         $data = array();
         if (!$items) {
-            echo 'Item empty <br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Item empty ' . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -2677,9 +2677,9 @@ class BaseController extends Controller
             }
             unset($items);
 
-            echo 'Data count: '. count($data) . '<br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Data count: '. count($data) . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -2717,7 +2717,7 @@ class BaseController extends Controller
         if ($page <= 0 || empty($page) || $page > $totalPage) {
             return;
         }
-        echo 'Page: ' . $page . '<br/>';
+        echo 'Page: ' . $page . "\n<br/>";
         flush();
         ob_flush();
         if (empty($page)) {
@@ -2735,9 +2735,9 @@ class BaseController extends Controller
 
         $data = array();
         if (!$items) {
-            echo 'Item empty <br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Item empty ' . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -2803,9 +2803,9 @@ class BaseController extends Controller
             }
             unset($items);
 
-            echo 'Data count: '. count($data) . '<br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Data count: '. count($data) . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
 
@@ -2883,9 +2883,9 @@ class BaseController extends Controller
     {
         $html = $this->loopFetchUrl($url);
         if (!is_object($html)) {
-            echo 'Item empty <br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Item empty ' . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
             return null;
@@ -2933,9 +2933,9 @@ class BaseController extends Controller
         }
 
         if (!$items) {
-            echo 'Item empty <br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Item empty ' . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
             return null;
@@ -2967,9 +2967,9 @@ class BaseController extends Controller
         }
 
         if (!$items) {
-            echo 'Item empty <br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Item empty ' . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
             return null;
@@ -2996,8 +2996,8 @@ class BaseController extends Controller
             return array();
         }
 
-        echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-        echo '=========================================================================<br/>';
+        echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+        echo '=========================================================================' . "\n<br/>";
         flush();
         ob_flush();
 
@@ -3059,9 +3059,9 @@ class BaseController extends Controller
         }
 
         if (!$items) {
-            echo 'Item empty <br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Item empty ' . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
             return null;
@@ -3091,9 +3091,9 @@ class BaseController extends Controller
         }
 
         if (!$items) {
-            echo 'Item empty <br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Item empty ' . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
             return null;
@@ -3111,7 +3111,7 @@ class BaseController extends Controller
 
     protected function getDetailSanOtoVn($url)
     {
-        echo '========================================BEGIN Detail SanOto======================================<br/>';
+        echo '========================================BEGIN Detail SanOto======================================' . "\n<br/>";
         flush();
         ob_flush();
 
@@ -3122,9 +3122,9 @@ class BaseController extends Controller
         }
 
         if (!$items) {
-            echo 'Item empty <br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Item empty ' . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
             return null;
@@ -3139,7 +3139,7 @@ class BaseController extends Controller
 
             $results['shortContent'] = trim(@$html->find('.table-striped ', 0)->parent()->innertext()) . trim(@$html->find('.table-striped ', 1)->parent()->innertext());
 
-            echo '========================================END Detail SanOto======================================<br/><br/><br/>';
+            echo '========================================END Detail SanOto======================================' . "\n<br/>"."\n<br/>"."\n<br/>";
             flush();
             ob_flush();
             unset($html);
@@ -3149,7 +3149,7 @@ class BaseController extends Controller
 
     protected function getDetailEnBac($url)
     {
-        echo '========================================BEGIN Detail ENBAC======================================<br/>';
+        echo '========================================BEGIN Detail ENBAC======================================' . "\n<br/>";
         flush();
         ob_flush();
 
@@ -3160,9 +3160,9 @@ class BaseController extends Controller
         }
 
         if (!$items) {
-            echo 'Item empty <br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Item empty ' . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
             return null;
@@ -3173,7 +3173,7 @@ class BaseController extends Controller
             $results = array();
             $results['shortContent'] = trim($items->innertext());
 
-            echo '========================================END Detail ENBAC======================================<br/><br/><br/>';
+            echo '========================================END Detail ENBAC======================================' . "\n<br/>". "\n<br/>". "\n<br/>";
             flush();
             ob_flush();
             unset($html);
@@ -3183,7 +3183,7 @@ class BaseController extends Controller
 
     protected function getDetailBanOtoRe($url)
     {
-        echo '========================================BEGIN Detail BAN OTO RE======================================<br/>';
+        echo '========================================BEGIN Detail BAN OTO RE======================================' . "\n<br/>";
         flush();
         ob_flush();
 
@@ -3194,9 +3194,9 @@ class BaseController extends Controller
         }
 
         if (!$items) {
-            echo 'Item empty <br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Item empty ' . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
             return null;
@@ -3215,7 +3215,7 @@ class BaseController extends Controller
                 'content' => trim($items->innertext()),
             );
 
-            echo '========================================END Detail BAN OTO RE======================================<br/><br/><br/>';
+            echo '========================================END Detail BAN OTO RE======================================' . "\n<br/>"."\n<br/>"."\n<br/>";
             flush();
             ob_flush();
             unset($html);
@@ -3225,7 +3225,7 @@ class BaseController extends Controller
 
     protected function getDetailSanXeHot($url)
     {
-        echo '========================================BEGIN Detail SAN XE HOT======================================<br/>';
+        echo '========================================BEGIN Detail SAN XE HOT======================================' . "\n<br/>";
         flush();
         ob_flush();
 
@@ -3236,9 +3236,9 @@ class BaseController extends Controller
         }
 
         if (!$items) {
-            echo 'Item empty <br/>';
-            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . '<br/>';
-            echo '=========================================================================<br/>';
+            echo 'Item empty ' . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
             flush();
             ob_flush();
             return null;
@@ -3256,7 +3256,7 @@ class BaseController extends Controller
                 'content' => trim($html->find('#mota', 0)->innertext()),
             );
 
-            echo '========================================END Detail SAN XE HOT======================================<br/><br/><br/>';
+            echo '========================================END Detail SAN XE HOT======================================' . "\n<br/>"."\n<br/>"."\n<br/>";
             flush();
             ob_flush();
             unset($html);
@@ -3267,7 +3267,7 @@ class BaseController extends Controller
     protected function loopFetchUrl($url)
     {
         try {
-            echo 'url: ' . $url . "<br/>";
+            echo 'url: ' . $url . "\n<br/>";
             flush();
             ob_flush();
 
@@ -3275,8 +3275,8 @@ class BaseController extends Controller
             return $html;
         } catch (\Exception $e) {
             $this->step_fail++;
-            echo 'Fail connecttion <br/>';
-            echo 'Step fail: ' . $this->step_fail . '<br/>';
+            echo 'Fail connecttion ' . "\n<br/>";
+            echo 'Step fail: ' . $this->step_fail . "\n<br/>";
             flush();
             ob_flush();
 

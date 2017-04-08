@@ -54,8 +54,8 @@ class CronController extends BaseController
 
     public function cronManual()
     {
-        $this->getChoTot();
-exit;
+//        $this->getChoTot();
+
         $this->getCarmundi();
 
         $this->getMuaBan();
