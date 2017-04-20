@@ -10,7 +10,6 @@ class CronController extends BaseController
     public function index(Request $request)
     {
         $this->getChoTot();
-
         $this->getCarmundi();
         $this->getBonBanh();
         $this->getMuaBan();
@@ -18,7 +17,10 @@ class CronController extends BaseController
         $this->getOtoVietNam(1, 20, '304');
         $this->getOtoVietNam(1, 20, '305');
 
-        $this->getBanXeHoi();
+        $types = \config('wrap.ban_xe_hoi');
+        foreach ($types as $type) {
+            $this->getBanXeHoi($type);
+        }
 
         $this->getChoXe();
 
@@ -54,19 +56,23 @@ class CronController extends BaseController
 
     public function cronManual()
     {
-//        $this->getChoTot();
-
+        /*
+        $this->getChoTot();
         $this->getCarmundi();
+        $this->getMuaBanNhanh();
+        $this->getBanOtoRe();
+        */
 
+        $this->getBonBanh();
         $this->getMuaBan();
 
-        $this->getBanXeHoi();
-
-        $this->getMuaBanNhanh(); // still dump
-
+        $types = \config('wrap.ban_xe_hoi');
+        foreach ($types as $type) {
+            $this->getBanXeHoi($type);
+        }
         $this->getOtoVietNam(1, 20, '304');
         $this->getOtoVietNam(1, 20, '305');
-    }
+     }
 
     public function bookAuto(Request $request)
     {

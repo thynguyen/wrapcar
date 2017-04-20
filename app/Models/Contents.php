@@ -73,11 +73,11 @@ class Contents extends Model
 //                            $query->where('city', 'LIKE', "%{$part}%");
 //                        }
 //                    });
-                    $query->orWhere(function($query) use ($parts) {
-                        foreach ($parts as $part) {
-                            $query->where('short_content', 'LIKE', "%{$part}%");
-                        }
-                    });
+//                    $query->orWhere(function($query) use ($parts) {
+//                        foreach ($parts as $part) {
+//                            $query->where('short_content', 'LIKE', "%{$part}%");
+//                        }
+//                    });
                 }
             } else {
                 $keyword = 'null';
@@ -90,6 +90,12 @@ class Contents extends Model
         if (!empty($city)) {
             $query->where(function($query) use ($city) {
                 $query->where('city', 'LIKE', "%{$city}%");
+                if ($city === 'TP HCM') {
+                    $query->orWhere('city', 'LIKE', "%Hồ Chí Minh%");
+                    $query->orWhere('city', 'LIKE', "%TP.HCM%");
+                    $query->orWhere('short_content', 'LIKE', "%Hồ Chí Minh%");
+                    $query->orWhere('short_content', 'LIKE', "%TP.HCM%");
+                }
                 $query->orWhereNull('city');
             });
         }
@@ -166,11 +172,11 @@ class Contents extends Model
 //                            $query->where('city', 'LIKE', "%{$part}%");
 //                        }
 //                    });
-                    $query->orWhere(function($query) use ($parts) {
-                        foreach ($parts as $part) {
-                            $query->where('short_content', 'LIKE', "%{$part}%");
-                        }
-                    });
+//                    $query->orWhere(function($query) use ($parts) {
+//                        foreach ($parts as $part) {
+//                            $query->where('short_content', 'LIKE', "%{$part}%");
+//                        }
+//                    });
                 }
             } else {
                 $keyword = 'null';
@@ -183,6 +189,12 @@ class Contents extends Model
         if (!empty($city)) {
             $query->where(function($query) use ($city) {
                 $query->where('city', 'LIKE', "%{$city}%");
+                if ($city === 'TP HCM') {
+                    $query->orWhere('city', 'LIKE', "%Hồ Chí Minh%");
+                    $query->orWhere('city', 'LIKE', "%TP.HCM%");
+                    $query->orWhere('short_content', 'LIKE', "%Hồ Chí Minh%");
+                    $query->orWhere('short_content', 'LIKE', "%TP.HCM%");
+                }
                 $query->orWhereNull('city');
             });
         }
