@@ -19,6 +19,7 @@ Route::get('front/test_email', 'Front\CronController@testEmail')->name('front_cr
 Route::get('front/test_bookauto', 'Front\CronController@testBookAuto')->name('front_cron_test_book');
 Route::get('front/push_phone', 'Front\PhoneController@index')->name('front_cron_push_phone');
 Route::get('front/push_phone_define', 'Front\PhoneController@pushPhoneDefine')->name('front_cron_push_phone_define');
+Route::get('front/test', 'Front\HomeController@testPage')->name('front_cron_test');
 
 Route::group(['prefix' => 'sale', 'middleware' => 'auth.sale'], function () {
     Route::get('/', 'Front\SearchController@index')->name('home_index');

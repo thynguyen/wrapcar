@@ -10,4 +10,10 @@ class HomeController extends Controller
     {
         return view('search.index');
     }
+    public function testPage(Request $request)
+    {
+        $page = $request->get('page');
+        $data = array('page' => $page);
+        return view('search.test', $data);
+    }
 }

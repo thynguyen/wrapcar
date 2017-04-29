@@ -51,7 +51,7 @@ class BaseController extends Controller
         }
          * 
          */
-        $totalPage = 788;
+        $totalPage = 807;
         if ($dataOld === NULL) {
             $page = $totalPage;
         }
@@ -839,7 +839,17 @@ class BaseController extends Controller
                     $title = trim($objA->find('div', 1)->plaintext); // brand car
                     $price = trim($item->find('div', 2)->innertext());
                     $city = trim($item->find('div', 3)->plaintext);
-                    $carCode = trim($item->find('div', 4)->find('span.car_code', 0)->plaintext);
+
+                    $carCode = null;
+                    $carCodeTemp = $item->find('div', 4);
+                    if ($carCodeTemp) {
+                        $carCodeTemp1 = $carCodeTemp->find('span.car_code', 0);
+                        if ($carCodeTemp1) {
+                            $carCode = trim($carCodeTemp1->plaintext);
+                            unset($carCodeTemp1);
+                        }
+                        unset($carCodeTemp);
+                    }
                     $shortContent = trim($item->find('div', 5)->innertext());
                     $contactAndPhone = trim($item->find('div.cb7', 0)->innertext());
 
@@ -1231,7 +1241,7 @@ class BaseController extends Controller
                     $phone = !empty($phone) ? $pdo->quote($phone) : null;
 
                     $createdAt = date('Y-m-d H:i:s');
-                    $data[] = "($link, $title, $price, $contact, $phone, $city, $shortContent, 'carmudi', \"$createdAt\")";
+                    $data[] = "($link, $title, $price, $city, $contact, $phone, $shortContent, 'carmudi', \"$createdAt\")";
 
                     $items[$indexL]->clear();
                 }
