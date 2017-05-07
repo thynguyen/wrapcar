@@ -7,8 +7,50 @@ use Illuminate\Support\Facades\Mail;
 
 class CronController extends BaseController
 {
+    public function gen_one_to_three() {
+        for ($i = 1; $i <= 10000000; $i++) {
+            // Note that $i is preserved between yields.
+            yield $i;
+        }
+    }
+    
+    public function gen_one_to_threexxx($step = 1000000) {
+        $arr = array();
+        for ($i = 1; $i <= $step; $i++) {
+            // Note that $i is preserved between yields.
+            $arr[] = $i;
+        }
+        return $arr;
+    }
+
     public function index(Request $request)
     {
+        /*
+        $start = microtime(true);
+        echo 'TIME START: ' . $start . '<br/>';
+        echo 'MEMORY: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+        echo "=========================================================================\n<br/>";
+        flush();
+        ob_flush();
+
+        $total = 10000000;
+        $step = 1000000;
+        $i = 0;
+        while($i < $total) {
+            $generator = $this->gen_one_to_three($step);
+            foreach ($generator as $value) {
+                //echo "$value\n<br/>";
+            }
+            $i = $i + $step;
+            unset($generator);
+        }
+        echo 'TIME END: ' . (microtime(true) - $start)/60 . '<br/>';
+        echo 'MEMORY: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+        echo "=========================================================================\n<br/>";
+        flush();
+        ob_flush();
+        exit;*/
+        
         $this->getChoTot();
         $this->getCarmundi();
         $this->getBonBanh();
@@ -63,6 +105,8 @@ class CronController extends BaseController
         $this->getBanOtoRe();
         */
 
+        $this->getCarmundi();
+        $this->getChoTot();
         $this->getBonBanh();
         $this->getMuaBan();
 

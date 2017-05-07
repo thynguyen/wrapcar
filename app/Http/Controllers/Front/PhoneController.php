@@ -68,8 +68,13 @@ class PhoneController extends BaseController
 //        $text = '2016 	';
 //        var_dump(preg_replace('/[^A-Za-z0-9\-]/', '', $text));
 //        exit;
+        
+//        $xxx = '0904175276';
+//        $aaa = $this->getPhoneFromString($xxx);
+//        var_dump($aaa);exit;
+
         ini_set('max_execution_time', 0);
-        $row = \App\Models\Contents::first();
+        $row = \App\Models\Contents::where('is_owner', 1)->first();
         $total = 0;
         if ($row !== null) {
             $total = $row->count();
@@ -88,6 +93,7 @@ class PhoneController extends BaseController
             $row = \DB::table("phones")->orderBy('created_at', 'DESC')->take(1)->first();
             $max_time = $row->created_at;
         }
+
         $this->stepRun($total, $step, $limit, $max_time);
 
         // Begin update into content
@@ -145,6 +151,7 @@ class PhoneController extends BaseController
         if (!empty($max_time)) {
             $query->where('created_at', '>', $max_time);
         }
+        $query->where('is_owner', 1);
         $results = $query->skip($offset)->take($limit)->get();
 
         if (!$results->count()) {
@@ -175,19 +182,22 @@ class PhoneController extends BaseController
              * 
              */
 
-            if (preg_match('/[0-9]{4}/', $result->phone)) {
-                $phone = $this->getPhoneFromString($result->phone);
+            $phone_temp = str_replace(' ', '', $result->phone);
+            if (preg_match('/[0-9]{4}/', $phone_temp)) {
+                $phone = $this->getPhoneFromString($phone_temp);
             } else if (preg_match('/[0-9]{4}/', $result->contact)) {
                 $phone = $this->getPhoneFromString($result->contact);
             } else {
 //                $phone = $this->getPhoneFromString($result->short_content);
                 $phone = $this->parseShortContent($result->short_content);
+                $phone = $this->getPhoneFromString($phone);
             }
-            
 //            var_dump($phone);
+//            var_dump($result->id);
 //            echo '<br/>';
 //            flush();
 //            ob_flush();
+
             $phone = $this->replaceString($phone);
             $phone = preg_replace('/[^A-Za-z0-9\-]/', '', $phone);
 
@@ -453,7 +463,7 @@ class PhoneController extends BaseController
 //            'dulichnetviet', ' Liên hệ', 'Mr Tuyến', '0904 88 - 0904616997 -', '- 093 4 - 094 999 3388', ' (A.Tu?n)', ' (C.Giang)',
 //            'Hoặc 0947116996', 'ĐT : '), '', $string);
         
-        $return = str_replace(array('ĐT: ', 'ĐT:', 'LH:', 'LH :', 'Hotline:', 'ĐT.', ' ', '', 'Hyundai10', '4695x1815x1825', '12240x2460x15201310', '79507780x23701550x1330', '2015-20161010', '40059kG1310', '39309mm1310', '85807640x24801800x28001800', '7690x2330x1420'), '', $string);
+        $return = str_replace(array('ĐT: ', 'ĐT:', 'LH:', 'LH :', 'Hotline:', 'ĐT.', ' ', '', 'Hyundai10', '4695x1815x1825', '12240x2460x15201310', '79507780x23701550x1330', '2015-20161010', '40059kG1310', '39309mm1310', '85807640x24801800x28001800', '7690x2330x1420', '<b>'), '', $string);
         return trim($return);
     }
 

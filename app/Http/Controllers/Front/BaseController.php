@@ -1238,7 +1238,7 @@ class BaseController extends Controller
                     $city = $pdo->quote($city);
                     $contact = $pdo->quote($contact);
                     $shortContent = $pdo->quote($shortContent);
-                    $phone = !empty($phone) ? $pdo->quote($phone) : null;
+                    $phone = $pdo->quote($phone);
 
                     $createdAt = date('Y-m-d H:i:s');
                     $data[] = "($link, $title, $price, $city, $contact, $phone, $shortContent, 'carmudi', \"$createdAt\")";
