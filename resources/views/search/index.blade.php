@@ -74,6 +74,15 @@
                                             @endif
                                         </select>
                                     </div>
+                                    <div class="col-sm-5 input-group-sm" style="margin-top: 5px;">
+                                        <select name="color" class="form-control">
+                                            @if(isset($colorList) && count($colorList))
+                                            @foreach($colorList as $valCo => $itemCo)
+                                            <option value="{{ $valCo }}" @if ($valCo == $color) selected="selected" @endif>{{ $itemCo }}</option>
+                                            @endforeach
+                                            @endif
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                             <div class="box-footer" style="text-align: center;">
@@ -100,6 +109,7 @@
                         <div>Giá: {!! str_replace('Giá:', '', $item->price) !!}</div>
                         <div>Liên hệ: {{ $item->contact }}</div>
                         <div>Thành phố: {{ $item->city }}</div>
+                        <div>Màu: {{ $item->color }}</div>
                         <div>
                             {!! mb_substr(strip_tags($item->short_content), 0, 1000, 'UTF-8') !!}...
                         </div>

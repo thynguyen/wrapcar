@@ -19,7 +19,7 @@ class Contents extends Model
     {
         $this->total = $total;
     }
-    public function getContent($keyword, $timeVal, $city, $offset, $limit, $isOwner = 1)
+    public function getContent($keyword, $timeVal, $city, $color, $offset, $limit, $isOwner = 1)
     {
         $query = DB::table($this->table)
             ->select('*')
@@ -99,6 +99,12 @@ class Contents extends Model
                 $query->orWhereNull('city');
             });
         }
+        if (!empty($color)) {
+            $query->where(function($query) use ($color) {
+                $query->where('color', 'LIKE', "%{$color}%");
+                $query->orWhereNull('color');
+            });
+        }
 
         $total = $query->count();
         if (!$total) {
@@ -107,7 +113,7 @@ class Contents extends Model
         $this->setTotal($total);
         $query->where('is_owner', '=', $isOwner);
 
-        $query->unionAll($this->getContentNotOwner($keyword, $timeVal, $city));
+        $query->unionAll($this->getContentNotOwner($keyword, $timeVal, $city, $color));
 
         
         $query->skip($offset)->take($limit);
@@ -118,7 +124,7 @@ class Contents extends Model
 //        return $query->paginate(20);
     }
 
-    public function getContentNotOwner($keyword, $timeVal, $city)
+    public function getContentNotOwner($keyword, $timeVal, $city, $color)
     {
         $query = DB::table($this->table)
             ->select('*')
@@ -196,6 +202,12 @@ class Contents extends Model
                     $query->orWhere('short_content', 'LIKE', "%TP.HCM%");
                 }
                 $query->orWhereNull('city');
+            });
+        }
+        if (!empty($color)) {
+            $query->where(function($query) use ($color) {
+                $query->where('color', 'LIKE', "%{$color}%");
+                $query->orWhereNull('color');
             });
         }
         $query->where('is_owner', '=', 0);

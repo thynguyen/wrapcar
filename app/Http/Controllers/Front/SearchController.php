@@ -73,12 +73,13 @@ class SearchController extends Controller
         $keyword = $request->get('keyword');
         $time = $request->get('time');
         $city = $request->get('city');
+        $color = $request->get('color');
         $timeVals = config('wrap.time_list_value');
         $timeVal = isset($timeVals[$time]) ? $timeVals[$time] : null;
 
         $content = new \App\Models\Contents();
 
-        $result = $content->getContent($keyword, $timeVal, $city, $offset, $perPage);
+        $result = $content->getContent($keyword, $timeVal, $city, $color, $offset, $perPage);
         $total = $content->getTotal();
 
         $pagination = new LengthAwarePaginator(
@@ -95,8 +96,10 @@ class SearchController extends Controller
         $data = array(
             'time' => $request->get('time'),
             'city' => $request->get('city'),
+            'color' => $request->get('color'),
             'timeList' => config('wrap.time_list'),
             'citiList' => config('wrap.city_list'),
+            'colorList' => config('wrap.color_list'),
             'keyword' => $keyword,
             'pagination' => $pagination,
         );

@@ -8,71 +8,6 @@ class PhoneController extends BaseController
 {
     public function index(Request $request)
     {
-//        $date = date('Y-m-d H:i:s', strtotime('-3 month'));
-//        echo $date;exit;
-//        $str = '+84908021999';
-//        if (preg_match("/^[+84]/", $str)) {
-//            echo 333;exit;
-//        }
-//        echo 555;exit;
-
-//        $str = 'mar hao:0908021999';
-//        if (preg_match("/[0-9]{7}/", $str)) {
-//            echo 333;exit;
-//        }
-//        echo 4444;exit;
-        
-//        $text = 'Liên hệ: <b>Đại Phát Auto</b><br> 522 Nguyễn Văn Cừ, Long Biên Hà Nội <br><br>ĐT: 0935154666';
-//        $text = 'Hotline: 0908.021.999';
-//        $strPost = strpos($text, 'Hotline: ');
-//        if ($strPost !== false) {
-//            $value = substr($text, $strPost + 8);
-//            var_dump($value);
-//        }
-        
-//        $text = '+84346346325 Bán xe Toyota Land Cruiser VX 2015, mới 100%, động cơ 4.6L, V8, 24 vale, DOHC.';
-//        $text = 'Hotline: 0902442996 Mr Trí Bán xe Mitsubishi Grandis 2.4 cũ năm 2010 tại TP Hồ Chí Minh. Mitsubishi Grandis 2.4 màu Bạc / Xám máy xăng, sử dụng số tự động, đã đi ';
-//        $text = 'Liên hệ: <b>Hùng Thuận Auto</b><br> Số 1 - Dương Đình Nghệ, Yên Hoà, Cầu Giấy Hà Nội <br><br>ĐT: 0989881386 - 0915411386';
-//        $strPost = strpos($text, 'LH: Mr.Vinh');
-//        $text = 'Liên hệ: <b>Hoàng Minh Quang</b><br> Km 10 Giải Phóng,Tứ Hiệp, Thanh Trì Hà Nội <br><br>ĐT: 0934595090 - 0985793968';
-//        $text = 'href="members/mua-cam-xe-dang-tra-gop.101776422/';
-//        $text = 'Liên hệ: <b>Hoàng Minh Quang</b><br> Km 10 Giải Phóng,Tứ Hiệp, Thanh Trì Hà Nội <br><br>LH : 0934595090 - 0985793968';
-//        $text = '+84945492626,+84945492626';
-//        $text = '0989375046 , 0989375046';
-//        if (preg_match('/[0-9]{4}/', $text)) {
-//            preg_match('/[0-9]{4}+\S+[0-9]{2,3}+\S+[0-9]+\S/', $text, $matches1);
-//            preg_match('/ĐT:\s+[0-9]+\S/', $text, $matches2);
-//            preg_match('/[0-9]+\.+[0-9]+\.+[0-9]+\S/', $text, $matches3);
-//            preg_match('/Hotline:\s+[0-9]+\S/', $text, $matches4);
-//            preg_match('/LH:\s+[0-9]+\S/', $text, $matches5);
-//            
-//            preg_match('/\S+[0-9\,]/', $text, $matches6);
-//            echo 'match 1:';
-//            var_dump($matches1) . '<br/>';
-//            echo 'match 2:<br/>';
-//            var_dump($matches2);
-//            echo 'match 3:<br/>';
-//            var_dump($matches3);
-//            echo 'match 4:<br/>';
-//            var_dump($matches4);
-//            echo 'match 5:<br/>';
-//            var_dump($matches5);
-//        
-//            echo 'match 6:<br/>';
-//            var_dump($matches6);
-//        }
-//        exit;
-
-//        echo trim(str_replace(array('', ' '), '', '2016 	'));
-//        exit;
-//        $text = '2016 	';
-//        var_dump(preg_replace('/[^A-Za-z0-9\-]/', '', $text));
-//        exit;
-        
-//        $xxx = '0904175276';
-//        $aaa = $this->getPhoneFromString($xxx);
-//        var_dump($aaa);exit;
-
         ini_set('max_execution_time', 0);
         $row = \App\Models\Contents::where('is_owner', 1)->first();
         $total = 0;
@@ -87,7 +22,7 @@ class PhoneController extends BaseController
         flush();
         ob_flush();
 
-        $total_row = \App\Models\Phones::all()->count();
+        $total_row = \App\Models\Phones::count();
         $max_time = null;
         if ($total_row) {
             $row = \DB::table("phones")->orderBy('created_at', 'DESC')->take(1)->first();

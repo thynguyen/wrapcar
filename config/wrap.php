@@ -143,7 +143,7 @@ return [
     ),
     'color_list' => array(
         '' => '--Màu--',
-        'AT' => 'Bạc',
+        'Bạc' => 'Bạc',
         'Cam' => 'Cam',
         'Cát' => 'Cát',
         'Đỏ' => 'Đỏ',

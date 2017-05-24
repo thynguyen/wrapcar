@@ -471,7 +471,7 @@ class BaseController extends Controller
 
         ini_set('max_execution_time', 0);
 
-        $totalPage = 65; // default
+        $totalPage = 3222; // default
         if ($dataOld === NULL) {
             $page = $totalPage;
         }
@@ -853,6 +853,8 @@ class BaseController extends Controller
                     $shortContent = trim($item->find('div', 5)->innertext());
                     $contactAndPhone = trim($item->find('div.cb7', 0)->innertext());
 
+                    $detail = $this->getDetailBonBanh($domain . $link);
+
                     $productYear = $pdo->quote($productYear);
                     $title = $pdo->quote($title);
                     $price = $pdo->quote($price);
@@ -861,9 +863,10 @@ class BaseController extends Controller
                     $carCode = $pdo->quote($carCode);
                     $shortContent = $pdo->quote($shortContent);
                     $contactAndPhone = $pdo->quote($contactAndPhone);
+                    $color = isset($detail['color']) ? $pdo->quote($detail['color']) : null;
 
                     $createdAt = date('Y-m-d H:i:s');
-                    $data[] = "($link, $carCode, $productYear, $title, $price, $contactAndPhone, $city, $shortContent, 'bon_banh', \"$createdAt\")";
+                    $data[] = "($link, $carCode, $productYear, $title, $price, $color, $contactAndPhone, $city, $shortContent, 'bon_banh', \"$createdAt\")";
 
                     unset($objA);
                     $items[$indexL]->clear();
@@ -878,10 +881,10 @@ class BaseController extends Controller
                 ob_flush();
 
                 if (count($data)) {
-                    $fields = array('link', 'code_car_site', 'product_year', 'brand_car', 'price', 'contact', 'city', 'short_content', 'type', 'created_at');
+                    $fields = array('link', 'code_car_site', 'product_year', 'brand_car', 'price', 'color', 'contact', 'city', 'short_content', 'type', 'created_at');
                     $values = array(
                         'link=VALUES(link)', 'code_car_site=VALUES(code_car_site)', 'product_year=VALUES(product_year)', 'brand_car=VALUES(brand_car)', 
-                        'price=VALUES(price)', 'contact=VALUES(contact)', 'city=VALUES(city)', 'short_content=VALUES(short_content)', 
+                        'price=VALUES(price)', 'color=VALUES(color)', 'contact=VALUES(contact)', 'city=VALUES(city)', 'short_content=VALUES(short_content)', 
                         'type=VALUES(type)', 'date_post=VALUES(date_post)', 'created_at=VALUES(created_at)');
                     $this->inserOrUpdate($fields, $data, $values);
                     unset($data);
@@ -1231,6 +1234,7 @@ class BaseController extends Controller
                     if (!empty($sku)) {
                         $phone = $this->getDetailCarmudi($domain, $sku);
                     }
+                    $detail = $this->getDetailCarmudiColor($domain . $link);
 
                     $title = $pdo->quote($title);
                     $link = $pdo->quote($domain . $link);
@@ -1239,9 +1243,10 @@ class BaseController extends Controller
                     $contact = $pdo->quote($contact);
                     $shortContent = $pdo->quote($shortContent);
                     $phone = $pdo->quote($phone);
+                    $color = isset($detail['color']) ? $pdo->quote($detail['color']) : null;
 
                     $createdAt = date('Y-m-d H:i:s');
-                    $data[] = "($link, $title, $price, $city, $contact, $phone, $shortContent, 'carmudi', \"$createdAt\")";
+                    $data[] = "($link, $title, $price, $city, $contact, $phone, $color, $shortContent, 'carmudi', \"$createdAt\")";
 
                     $items[$indexL]->clear();
                 }
@@ -1254,10 +1259,10 @@ class BaseController extends Controller
                 ob_flush();
 
                 if (count($data)) {
-                    $fields = array('link', 'brand_car', 'price', 'city', 'contact', 'phone', 'short_content', 'type', 'created_at');
+                    $fields = array('link', 'brand_car', 'price', 'city', 'contact', 'phone', 'color', 'short_content', 'type', 'created_at');
                     $values = array(
                         'link=VALUES(link)', 'brand_car=VALUES(brand_car)', 'price=VALUES(price)', 'city=VALUES(city)', 'contact=VALUES(contact)', 
-                        'phone=VALUES(phone), short_content=VALUES(short_content)', 'type=VALUES(type)', 'created_at=VALUES(created_at)');
+                        'phone=VALUES(phone), color=VALUES(color), short_content=VALUES(short_content)', 'type=VALUES(type)', 'created_at=VALUES(created_at)');
                     $this->inserOrUpdate($fields, $data, $values);
 
                     unset($data);
@@ -1343,12 +1348,8 @@ class BaseController extends Controller
                     $datePost = trim(@$item->find('.info .newdate', 0)->plaintext);
                     $shortContent = trim(@$item->find('.info', 0)->innertext());
 
-                    // Get Phone number detail
-    //                $shortContent = null;
-    //                if (!empty($link)) {
-    //                    $temps = $this->getDetailBanXeHoi($domain . $link);
-    //                    $shortContent = isset($temps['shortContent']) ? $temps['shortContent'] : null;
-    //                }
+                    // Get color from detail
+                    $detail = $this->getDetailBanXeHoi($domain . $link);
 
                     $title = $pdo->quote($title);
                     $link = $pdo->quote($domain . $link);
@@ -1358,9 +1359,11 @@ class BaseController extends Controller
                     $productYear = $pdo->quote($productYear);
                     $shortContent = $pdo->quote($shortContent);
                     $datePost = $pdo->quote($datePost);
+                    $color = isset($detail['color']) ? $detail['color'] : null;
+                    $color = $pdo->quote($color);
 
                     $createdAt = date('Y-m-d H:i:s');
-                    $data[] = "($link, $title, $price, $phone, $city, $productYear, $datePost, $shortContent, 'ban_xe_hoi', \"$createdAt\")";
+                    $data[] = "($link, $title, $price, $phone, $color, $city, $productYear, $datePost, $shortContent, 'ban_xe_hoi', \"$createdAt\")";
 
                     $items[$indexL]->clear();
                 }
@@ -1373,9 +1376,9 @@ class BaseController extends Controller
                 ob_flush();
 
                 if (count($data)) {
-                    $fields = array('link', 'brand_car', 'price', 'phone', 'city', 'product_year', 'date_post', 'short_content', 'type', 'created_at');
+                    $fields = array('link', 'brand_car', 'price', 'phone', 'color', 'city', 'product_year', 'date_post', 'short_content', 'type', 'created_at');
                     $values = array(
-                        'link=VALUES(link)', 'brand_car=VALUES(brand_car)', 'price=VALUES(price)', 'phone=VALUES(phone)', 'city=VALUES(city)', 
+                        'link=VALUES(link)', 'brand_car=VALUES(brand_car)', 'price=VALUES(price)', 'phone=VALUES(phone)', 'color=VALUES(color)', 'city=VALUES(city)', 
                         'product_year=VALUES(product_year)', 'date_post=VALUES(date_post)', 'short_content=VALUES(short_content)', 'type=VALUES(type)', 'created_at=VALUES(created_at)');
                     $this->inserOrUpdate($fields, $data, $values);
 
@@ -1524,7 +1527,7 @@ class BaseController extends Controller
             flush();
             ob_flush();
 
-            $url = \config('wrap.url_site.xe360') . '?page='.$page;
+            $url = \config('wrap.url_site.xe360') . '?start='.$page;
 
             $html = $this->loopFetchUrl($url);
             $items = null;
@@ -2983,6 +2986,75 @@ class BaseController extends Controller
         }
     }
 
+    protected function getDetailBonBanh($url)
+    {
+        $html = $this->loopFetchUrl($url);
+        $items = null;
+        if (is_object($html)) {
+            $items = $html->find('.tabbertab', 0);
+        }
+        if (!$items) {
+            echo 'Item empty ' . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
+            flush();
+            ob_flush();
+            return null;
+
+            unset($html);
+            unset($items);
+        } else {
+            $results = array();
+            $temp = $html->find('.col #mail_parent', 4);
+            if ($temp) {
+                $color = $temp->find('.txt_input', 0);
+                if ($color) {
+                    $results['color'] = trim($color->plaintext);
+                }
+                unset($color);
+                unset($temp);
+            }
+
+            unset($html);
+
+            return $results;
+        }
+    }
+    protected function getDetailCarmudiColor($url)
+    {
+        $html = $this->loopFetchUrl($url);
+        $items = null;
+        if (is_object($html)) {
+            $items = $html->find('#details', 0);
+        }
+        if (!$items) {
+            echo 'Item empty ' . "\n<br/>";
+            echo 'Memory: ' . round((memory_get_usage()) / 1024 / 1024) . "\n<br/>";
+            echo '=========================================================================' . "\n<br/>";
+            flush();
+            ob_flush();
+            return null;
+
+            unset($html);
+            unset($items);
+        } else {
+            $results = array();
+            $temp = $html->find('.contents .left', 0);
+            if ($temp) {
+                $color = $temp->find('li', 0);
+                if ($color) {
+                    $results['color'] = str_replace('Nhóm màu xe', '', $color->plaintext);
+                }
+                unset($color);
+                unset($temp);
+            }
+
+            unset($html);
+
+            return $results;
+        }
+    }
+
     protected function getDetailCarmudi($url, $sku)
     {
         $url  = $url . '/listings/getsellerphonenumbers/?sku=' . $sku;
@@ -3109,7 +3181,7 @@ class BaseController extends Controller
         $html = $this->loopFetchUrl($url);
         $items = null;
         if (is_object($html)) {
-            $items = @$html->find('.bound .desc', 0);
+            $items = @$html->find('.infotechv2', 0);
         }
 
         if (!$items) {
@@ -3123,13 +3195,32 @@ class BaseController extends Controller
             unset($html);
             unset($items);
         } else {
-            $results = array();
-            $results['shortContent'] = trim(@$html->find('.description', 0)->innertext());
+            $color = $this->getColorBanXeHoi($html, 2);
+            if ($color == null) {
+                $color = $this->getColorBanXeHoi($html, 3);
+            }
+            $results = array(
+                'color' => $color,
+            );
 
             unset($html);
 
             return $results;
         }
+    }
+
+    protected function getColorBanXeHoi($obj, $num)
+    {
+        $colorText = null;
+        $color = $obj->find('.colright .row', $num);
+        if ($color) {
+            $temp = $color->find('label', 0)->plaintext;
+            if (preg_match('/xe/', $temp)) {
+                $colorText = $color->find('span', 0)->plaintext;
+            }
+            unset($color);
+        }
+        return $colorText;
     }
 
     protected function getDetailChoXe($url)
